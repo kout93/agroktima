@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Αγρόκτημα{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% if not stripe_configured %}
+<div class="test-banner">🧪 Λειτουργία δοκιμής — οι πληρωμές δεν είναι πραγματικές μέχρι να προστεθεί κλειδί Stripe</div>
+{% endif %}
+<nav>
+  <a class="brand" href="{{ url_for('main.home') }}">🫒 Αγρόκτημα</a>
+  <div class="links">
+    {% if current_user %}
+      {% if current_user['role'] == 'farmer' %}
+        <a href="{{ url_for('fields.list_fields') }}">Κτήματα</a>
+        <a href="{{ url_for('trees.manage_trees') }}">Δέντρα μου</a>
+        <a href="{{ url_for('stats.overview') }}">Στατιστικά</a>
+      {% else %}
+        <a href="{{ url_for('trees.browse') }}">Υιοθέτησε Δέντρο</a>
+        <a href="{{ url_for('trees.my_adoptions') }}">Οι Υιοθεσίες μου</a>
+      {% endif %}
+      <a href="{{ url_for('auth.logout') }}">Αποσύνδεση ({{ current_user['name'] }})</a>
+    {% else %}
+      <a href="{{ url_for('auth.login') }}">Σύνδεση</a>
+      <a href="{{ url_for('auth.register') }}">Εγγραφή</a>
+    {% endif %}
+  </div>
+</nav>
+<div class="wrap">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</div>
+</body>
+</html>

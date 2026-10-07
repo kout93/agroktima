@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Υιοθέτησε Δέντρο{% endblock %}
+{% block content %}
+<h1>Υιοθέτησε ένα δέντρο ελιάς</h1>
+<p>Πλήρωσε την ετήσια συνδρομή ενός δέντρου και πάρε στο τέλος της σεζόν το λάδι που παρήγαγε.</p>
+
+{% if trees %}
+  {% for t in trees %}
+  <div class="tree-card">
+    <div>
+      <div style="font-weight:600;">🫒 {{ t['code'] }}</div>
+      <div style="color:var(--ink-soft); font-size:.85rem;">
+        {{ t['farmer_name'] }}{% if t['field_location'] %} · {{ t['field_location'] }}{% endif %}
+        {% if t['est_oil_kg_min'] %} · {{ t['est_oil_kg_min'] }}–{{ t['est_oil_kg_max'] }} kg λάδι/έτος{% endif %}
+        · {{ "%.2f"|format(t['price_per_year']) }}€/έτος
+      </div>
+    </div>
+    <a class="btn soil" href="{{ url_for('trees.view_tree', tree_id=t['id']) }}">Δες περισσότερα</a>
+  </div>
+  {% endfor %}
+{% else %}
+  <p>Δεν υπάρχουν αυτή τη στιγμή διαθέσιμα δέντρα.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Τα κτήματά μου{% endblock %}
+{% block content %}
+<h1>Τα κτήματά μου</h1>
+<a class="btn" href="{{ url_for('fields.new_field') }}">+ Νέο κτήμα</a>
+
+{% if fields %}
+  {% for f in fields %}
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <h3 style="margin-bottom:4px;"><a href="{{ url_for('fields.view_field', field_id=f['id']) }}">{{ f['name'] }}</a></h3>
+        <p style="margin:0; font-size:.88rem;">
+          {{ f['location'] or '—' }}
+          {% if f['area_stremma'] %} · {{ f['area_stremma'] }} στρέμματα{% endif %}
+          {% if f['crop'] %} · {{ f['crop'] }}{% endif %}
+        </p>
+      </div>
+      <a class="btn ghost" href="{{ url_for('fields.view_field', field_id=f['id']) }}">Άνοιγμα</a>
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+  <p>Δεν έχεις προσθέσει ακόμα κανένα κτήμα.</p>
+{% endif %}
+{% endblock %}

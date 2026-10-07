@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Νέο κτήμα{% endblock %}
+{% block content %}
+<div class="card" style="max-width:480px;">
+  <h1>Νέο κτήμα</h1>
+  <form method="post">
+    <label>Όνομα κτήματος</label>
+    <input type="text" name="name" placeholder='π.χ. Ελαιώνας "Παλιάμπελο"' required>
+    <label>Τοποθεσία</label>
+    <input type="text" name="location" placeholder="π.χ. Καλαμάτα">
+    <label>Έκταση (στρέμματα)</label>
+    <input type="number" step="0.1" name="area_stremma">
+    <label>Καλλιέργεια</label>
+    <input type="text" name="crop" placeholder="π.χ. Ελιά Καλαμών">
+    <label>Αριθμός δέντρων</label>
+    <input type="number" name="tree_count">
+    <button class="btn" type="submit">Αποθήκευση</button>
+  </form>
+</div>
+{% endblock %}

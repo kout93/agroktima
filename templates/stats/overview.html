@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Στατιστικά{% endblock %}
+{% block content %}
+<h1>Παραγωγή & Έξοδα</h1>
+
+<div class="stat-row">
+  <div class="stat">
+    <div class="stat-num">{{ "%.2f"|format(total_cost) }}€</div>
+    <div class="stat-label">Σύνολο εξόδων (όλα τα κτήματα)</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">{{ "%.2f"|format(adoption_income['total']) }}€</div>
+    <div class="stat-label">Έσοδα από υιοθεσίες ({{ adoption_income['count'] }} πληρωμένες)</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">{{ tree_counts['adopted'] or 0 }}/{{ tree_counts['total'] or 0 }}</div>
+    <div class="stat-label">Υιοθετημένα δέντρα</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Έξοδα ανά κτήμα</h2>
+  {% if field_costs %}
+    {% for f in field_costs %}
+    <div class="bar-row" style="display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:.88rem;">
+      <div style="width:140px; color:var(--ink-soft);">{{ f['name'] }}</div>
+      <div style="flex:1; background:var(--cream); border-radius:5px; height:10px; overflow:hidden;">
+        <div style="height:100%; background:var(--olive); width:{{ (f['total_cost'] / max_cost * 100) | round(1) }}%;"></div>
+      </div>
+      <div style="width:90px; text-align:right;">{{ "%.2f"|format(f['total_cost']) }}€</div>
+    </div>
+    {% endfor %}
+  {% else %}
+  <p>Δεν υπάρχουν ακόμα κτήματα με καταχωρημένα έξοδα.</p>
+  {% endif %}
+</div>
+{% endblock %}

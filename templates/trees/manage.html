@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Δέντρα προς υιοθεσία{% endblock %}
+{% block content %}
+<h1>Δέντρα προς υιοθεσία</h1>
+
+<div class="card">
+  <h2>Νέο δέντρο</h2>
+  <form method="post" action="{{ url_for('trees.new_tree') }}">
+    <label>Κωδικός δέντρου</label>
+    <input type="text" name="code" placeholder="π.χ. Δέντρο #14 — Παλιάμπελο" required>
+    <label>Κτήμα</label>
+    <select name="field_id">
+      <option value="">— χωρίς σύνδεση —</option>
+      {% for f in fields %}
+      <option value="{{ f['id'] }}">{{ f['name'] }}</option>
+      {% endfor %}
+    </select>
+    <label>Εκτιμώμενη παραγωγή λαδιού (κιλά/έτος)</label>
+    <div style="display:flex; gap:8px;">
+      <input type="number" step="0.1" name="est_oil_kg_min" placeholder="από">
+      <input type="number" step="0.1" name="est_oil_kg_max" placeholder="έως">
+    </div>
+    <label>Τιμή υιοθεσίας (€/έτος)</label>
+    <input type="number" step="0.01" name="price_per_year" required>
+    <button class="btn" type="submit">Προσθήκη</button>
+  </form>
+</div>
+
+{% if trees %}
+  {% for t in trees %}
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <h3 style="margin-bottom:4px;">{{ t['code'] }} <span class="badge {{ t['status'] }}">{{ 'Υιοθετημένο' if t['status'] == 'adopted' else 'Διαθέσιμο' }}</span></h3>
+        <p style="margin:0; font-size:.88rem;">
+          {{ t['field_name'] or 'Χωρίς κτήμα' }} · {{ "%.2f"|format(t['price_per_year']) }}€/έτος
+          {% if t['est_oil_kg_min'] %} · {{ t['est_oil_kg_min'] }}–{{ t['est_oil_kg_max'] }} kg λάδι/έτος{% endif %}
+        </p>
+      </div>
+    </div>
+    <form method="post" action="{{ url_for('trees.add_update', tree_id=t['id']) }}" enctype="multipart/form-data" style="margin-top:12px;">
+      <label>Νέα ενημέρωση προόδου (θα τη βλέπει ο πελάτης)</label>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <input type="text" name="message" placeholder="π.χ. Ξεκίνησε το κλάδεμα χειμώνα" style="flex:1; min-width:160px;">
+        <input type="file" name="photo" accept="image/*" capture="environment" style="flex:1; min-width:160px;">
+        <button class="btn ghost" type="submit" style="margin-top:0; white-space:nowrap;">Προσθήκη</button>
+      </div>
+    </form>
+  </div>
+  {% endfor %}
+{% else %}
+  <p>Δεν έχεις προσθέσει ακόμα δέντρα προς υιοθεσία.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}{{ field['name'] }}{% endblock %}
+{% block content %}
+<h1>{{ field['name'] }}</h1>
+<p>
+  {{ field['location'] or '—' }}
+  {% if field['area_stremma'] %} · {{ field['area_stremma'] }} στρέμματα{% endif %}
+  {% if field['crop'] %} · {{ field['crop'] }}{% endif %}
+  {% if field['tree_count'] %} · {{ field['tree_count'] }} δέντρα{% endif %}
+</p>
+
+<div class="stat-row">
+  <div class="stat">
+    <div class="stat-num">{{ "%.2f"|format(total_cost) }}€</div>
+    <div class="stat-label">Σύνολο εξόδων</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">{{ tasks|length }}</div>
+    <div class="stat-label">Καταχωρημένες εργασίες</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Καταχώρηση εργασίας</h2>
+  <form method="post" action="{{ url_for('fields.new_task', field_id=field['id']) }}" enctype="multipart/form-data">
+    <label>Τύπος εργασίας</label>
+    <select name="task_type" required>
+      {% for t in task_types %}
+      <option value="{{ t }}">{{ t }}</option>
+      {% endfor %}
+    </select>
+    <label>Ημερομηνία</label>
+    <input type="date" name="task_date" required>
+    <label>Κόστος (€)</label>
+    <input type="number" step="0.01" name="cost" placeholder="0.00">
+    <label>Σημειώσεις</label>
+    <textarea name="notes"></textarea>
+    <label>Φωτογραφία (προαιρετικό)</label>
+    <input type="file" name="photo" accept="image/*" capture="environment">
+    <button class="btn" type="submit">Καταχώρηση</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Ιστορικό εργασιών</h2>
+  {% if tasks %}
+  <table>
+    <thead><tr><th>Ημερομηνία</th><th>Εργασία</th><th>Κόστος</th><th>Σημειώσεις</th><th>Φωτό</th></tr></thead>
+    <tbody>
+      {% for t in tasks %}
+      <tr>
+        <td>{{ t['task_date'] }}</td>
+        <td>{{ t['task_type'] }}</td>
+        <td>{{ "%.2f"|format(t['cost'] or 0) }}€</td>
+        <td>{{ t['notes'] or '—' }}</td>
+        <td>
+          {% if t['photo_filename'] %}
+          <a href="{{ url_for('static', filename='uploads/' + t['photo_filename']) }}" target="_blank">
+            <img src="{{ url_for('static', filename='uploads/' + t['photo_filename']) }}" alt="Φωτογραφία εργασίας" style="width:48px; height:48px; object-fit:cover; border-radius:6px; border:1px solid var(--line);">
+          </a>
+          {% else %}—{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>Δεν υπάρχουν ακόμα καταχωρημένες εργασίες.</p>
+  {% endif %}
+</div>
+{% endblock %}
