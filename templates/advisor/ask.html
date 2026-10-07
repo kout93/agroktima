@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Συμβουλές AI{% endblock %}
+{% block content %}
+<h1>Συμβουλές & βοήθεια</h1>
+<p>Ρώτησε οτιδήποτε για τα κτήματά σου — η απάντηση βασίζεται στο δικό σου ιστορικό εργασιών.</p>
+
+{% if not ai_configured %}
+<div class="flash error" style="background:#FCF3D9; color:#7A5A12;">
+  🧪 Δεν έχει συνδεθεί πραγματικό μοντέλο AI ακόμα — οι απαντήσεις παρακάτω είναι βασικές συμβουλές από τα δικά σου δεδομένα. Δες το README για το πώς θα ενεργοποιηθούν πλήρεις απαντήσεις AI.
+</div>
+{% endif %}
+
+<div class="card">
+  <form method="post">
+    <label>Η ερώτησή σου</label>
+    <textarea name="question" placeholder="π.χ. Πότε πρέπει να λιπάνω τον ελαιώνα μου;" required></textarea>
+    <button class="btn soil" type="submit">Ρώτησε</button>
+  </form>
+</div>
+
+{% if history %}
+<h2>Ιστορικό ερωτήσεων</h2>
+{% for h in history %}
+<div class="card">
+  <p style="margin:0 0 8px; font-weight:600;">{{ h['question'] }}</p>
+  <p style="margin:0; white-space:pre-wrap;">{{ h['answer'] }}</p>
+  <p style="margin:8px 0 0; font-size:.78rem; color:var(--ink-soft);">
+    {{ h['created_at'] }} · {{ 'απάντηση AI' if h['is_ai'] else 'βασική συμβουλή' }}
+  </p>
+</div>
+{% endfor %}
+{% endif %}
+{% endblock %}

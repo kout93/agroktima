@@ -1,5 +1,7 @@
 {% extends "base.html" %}
+{% import "_map_macros.html" as maps %}
 {% block title %}{{ tree['code'] }}{% endblock %}
+{% block extra_head %}{{ maps.leaflet_head() }}{% endblock %}
 {% block content %}
 <h1>🫒 {{ tree['code'] }}</h1>
 <p>
@@ -35,6 +37,13 @@
   <p><span class="badge adopted">Υιοθετημένο</span> Αυτό το δέντρο έχει ήδη υιοθετηθεί.</p>
 {% endif %}
 
+{% if tree['display_latitude'] and tree['display_longitude'] %}
+<div class="card">
+  <h2>Πού βρίσκεται</h2>
+  {{ maps.static_map('tree-location-map', tree['display_latitude'], tree['display_longitude'], tree['code']) }}
+</div>
+{% endif %}
+
 <div class="card">
   <h2>Ενημερώσεις προόδου</h2>
   {% if updates %}
@@ -51,3 +60,4 @@
   {% endif %}
 </div>
 {% endblock %}
+{% block extra_scripts %}{{ maps.leaflet_script() }}{% endblock %}

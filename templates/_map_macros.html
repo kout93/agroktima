@@ -1,0 +1,38 @@
+{% macro leaflet_head() %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+{% endmacro %}
+
+{% macro leaflet_script() %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+{% endmacro %}
+
+{# Στατικός χάρτης με ένα pin, μόνο για προβολή (όχι επεξεργάσιμος).
+   Το script μπορεί να εμφανιστεί στη σελίδα ΠΡΙΝ φορτώσει το Leaflet
+   (π.χ. αν ο χάρτης είναι μέσα στο content block και το Leaflet στο
+   extra_scripts block, στο τέλος της σελίδας) — γι' αυτό περιμένει
+   με ασφάλεια μέχρι να οριστεί το window.L πριν αρχικοποιηθεί. #}
+{% macro static_map(map_id, lat, lng, popup_text='') %}
+<div id="{{ map_id }}" style="height:220px; border-radius:10px; border:1px solid var(--line);"></div>
+<script>
+(function(){
+  function init(){
+    var m = L.map('{{ map_id }}').setView([{{ lat }}, {{ lng }}], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '&copy; OpenStreetMap συνεισφέροντες'
+    }).addTo(m);
+    var marker = L.marker([{{ lat }}, {{ lng }}]).addTo(m);
+    {% if popup_text %}
+    marker.bindPopup({{ popup_text|tojson }}).openPopup();
+    {% endif %}
+    setTimeout(function(){ m.invalidateSize(); }, 150);
+  }
+  if (window.L) { init(); return; }
+  var tries = 0;
+  var iv = setInterval(function(){
+    tries++;
+    if (window.L) { clearInterval(iv); init(); }
+    else if (tries > 100) { clearInterval(iv); }
+  }, 50);
+})();
+</script>
+{% endmacro %}

@@ -19,13 +19,13 @@ def manage_trees():
     db = get_db()
     user = current_user()
     rows = db.execute(
-        """SELECT tr.*, f.name AS field_name
+        """SELECT tr.*, f.name AS field_name, f.latitude AS field_latitude, f.longitude AS field_longitude
            FROM trees tr LEFT JOIN fields f ON f.id = tr.field_id
            WHERE tr.farmer_id = ? ORDER BY tr.created_at DESC""",
         (user["id"],),
     ).fetchall()
     fields = db.execute(
-        "SELECT id, name FROM fields WHERE farmer_id = ?", (user["id"],)
+        "SELECT id, name, latitude, longitude FROM fields WHERE farmer_id = ?", (user["id"],)
     ).fetchall()
     return render_template("trees/manage.html", trees=rows, fields=fields)
 
@@ -40,14 +40,16 @@ def new_tree():
     est_min = request.form.get("est_oil_kg_min", "").strip()
     est_max = request.form.get("est_oil_kg_max", "").strip()
     price = request.form.get("price_per_year", "").strip()
+    latitude = request.form.get("latitude", "").strip()
+    longitude = request.form.get("longitude", "").strip()
 
     if not code or not price:
         flash("Χρειάζεται τουλάχιστον κωδικός δέντρου και τιμή.", "error")
         return redirect(url_for("trees.manage_trees"))
 
     db.execute(
-        """INSERT INTO trees (farmer_id, field_id, code, est_oil_kg_min, est_oil_kg_max, price_per_year)
-           VALUES (?, ?, ?, ?, ?, ?)""",
+        """INSERT INTO trees (farmer_id, field_id, code, est_oil_kg_min, est_oil_kg_max, price_per_year, latitude, longitude)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
         (
             user["id"],
             int(field_id) if field_id else None,
@@ -55,10 +57,39 @@ def new_tree():
             float(est_min) if est_min else None,
             float(est_max) if est_max else None,
             float(price),
+            float(latitude) if latitude else None,
+            float(longitude) if longitude else None,
         ),
     )
     db.commit()
     flash("Το δέντρο προστέθηκε προς υιοθεσία.", "success")
+    return redirect(url_for("trees.manage_trees"))
+
+
+@bp.route("/manage/<int:tree_id>/location", methods=["POST"])
+@role_required("farmer")
+def update_tree_location(tree_id):
+    db = get_db()
+    user = current_user()
+    tree = db.execute(
+        "SELECT * FROM trees WHERE id = ? AND farmer_id = ?", (tree_id, user["id"])
+    ).fetchone()
+    if tree is None:
+        flash("Το δέντρο δεν βρέθηκε.", "error")
+        return redirect(url_for("trees.manage_trees"))
+
+    latitude = request.form.get("latitude", "").strip()
+    longitude = request.form.get("longitude", "").strip()
+    if not latitude or not longitude:
+        flash("Σημείωσε ένα σημείο στον χάρτη πρώτα.", "error")
+        return redirect(url_for("trees.manage_trees"))
+
+    db.execute(
+        "UPDATE trees SET latitude = ?, longitude = ? WHERE id = ?",
+        (float(latitude), float(longitude), tree_id),
+    )
+    db.commit()
+    flash("Η θέση του δέντρου ενημερώθηκε.", "success")
     return redirect(url_for("trees.manage_trees"))
 
 
@@ -95,7 +126,10 @@ def add_update(tree_id):
 def browse():
     db = get_db()
     rows = db.execute(
-        """SELECT tr.*, f.name AS field_name, f.location AS field_location, u.name AS farmer_name
+        """SELECT tr.*, f.name AS field_name, f.location AS field_location,
+                  COALESCE(tr.latitude, f.latitude) AS display_latitude,
+                  COALESCE(tr.longitude, f.longitude) AS display_longitude,
+                  u.name AS farmer_name
            FROM trees tr
            LEFT JOIN fields f ON f.id = tr.field_id
            JOIN users u ON u.id = tr.farmer_id
@@ -109,7 +143,10 @@ def browse():
 def view_tree(tree_id):
     db = get_db()
     tree = db.execute(
-        """SELECT tr.*, f.name AS field_name, f.location AS field_location, u.name AS farmer_name
+        """SELECT tr.*, f.name AS field_name, f.location AS field_location,
+                  COALESCE(tr.latitude, f.latitude) AS display_latitude,
+                  COALESCE(tr.longitude, f.longitude) AS display_longitude,
+                  u.name AS farmer_name
            FROM trees tr
            LEFT JOIN fields f ON f.id = tr.field_id
            JOIN users u ON u.id = tr.farmer_id
@@ -223,7 +260,10 @@ def my_adoptions():
     db = get_db()
     user = current_user()
     rows = db.execute(
-        """SELECT a.*, tr.code, tr.est_oil_kg_min, tr.est_oil_kg_max, f.name AS field_name, u.name AS farmer_name
+        """SELECT a.*, tr.id AS tree_id, tr.code, tr.est_oil_kg_min, tr.est_oil_kg_max,
+                  COALESCE(tr.latitude, f.latitude) AS display_latitude,
+                  COALESCE(tr.longitude, f.longitude) AS display_longitude,
+                  f.name AS field_name, u.name AS farmer_name
            FROM adoptions a
            JOIN trees tr ON tr.id = a.tree_id
            LEFT JOIN fields f ON f.id = tr.field_id

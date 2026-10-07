@@ -1,18 +1,26 @@
 {% extends "base.html" %}
 {% block title %}Δέντρα προς υιοθεσία{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  #new-tree-map{ height:220px; border-radius:10px; border:1px solid var(--line); margin-top:6px; }
+  .tree-map{ height:200px; border-radius:10px; border:1px solid var(--line); margin-top:8px; display:none; }
+  .tree-map.open{ display:block; }
+</style>
+{% endblock %}
 {% block content %}
 <h1>Δέντρα προς υιοθεσία</h1>
 
 <div class="card">
   <h2>Νέο δέντρο</h2>
-  <form method="post" action="{{ url_for('trees.new_tree') }}">
+  <form method="post" action="{{ url_for('trees.new_tree') }}" id="new-tree-form">
     <label>Κωδικός δέντρου</label>
     <input type="text" name="code" placeholder="π.χ. Δέντρο #14 — Παλιάμπελο" required>
     <label>Κτήμα</label>
-    <select name="field_id">
+    <select name="field_id" id="new-tree-field">
       <option value="">— χωρίς σύνδεση —</option>
       {% for f in fields %}
-      <option value="{{ f['id'] }}">{{ f['name'] }}</option>
+      <option value="{{ f['id'] }}" data-lat="{{ f['latitude'] or '' }}" data-lng="{{ f['longitude'] or '' }}">{{ f['name'] }}</option>
       {% endfor %}
     </select>
     <label>Εκτιμώμενη παραγωγή λαδιού (κιλά/έτος)</label>
@@ -22,6 +30,15 @@
     </div>
     <label>Τιμή υιοθεσίας (€/έτος)</label>
     <input type="number" step="0.01" name="price_per_year" required>
+
+    <label>Ακριβές σημείο του δέντρου (προαιρετικό)</label>
+    <div id="new-tree-map"></div>
+    <p style="font-size:.8rem; color:var(--ink-soft); margin-top:6px;">Αν δεν σημαδέψεις σημείο, το δέντρο θα εμφανίζεται στη θέση του κτήματος.</p>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <input type="number" step="any" name="latitude" id="new-tree-lat" placeholder="Γεωγραφικό πλάτος" style="flex:1;">
+      <input type="number" step="any" name="longitude" id="new-tree-lng" placeholder="Γεωγραφικό μήκος" style="flex:1;">
+    </div>
+
     <button class="btn" type="submit">Προσθήκη</button>
   </form>
 </div>
@@ -35,9 +52,21 @@
         <p style="margin:0; font-size:.88rem;">
           {{ t['field_name'] or 'Χωρίς κτήμα' }} · {{ "%.2f"|format(t['price_per_year']) }}€/έτος
           {% if t['est_oil_kg_min'] %} · {{ t['est_oil_kg_min'] }}–{{ t['est_oil_kg_max'] }} kg λάδι/έτος{% endif %}
+          {% if t['latitude'] %} · 📍 έχει σημείο{% endif %}
         </p>
       </div>
+      <button type="button" class="btn ghost toggle-tree-map" data-tree="{{ t['id'] }}" style="margin-top:0; white-space:nowrap;">
+        {{ 'Αλλαγή θέσης' if t['latitude'] else '📍 Όρισε θέση' }}
+      </button>
     </div>
+
+    <div class="tree-map" id="tree-map-{{ t['id'] }}" data-lat="{{ t['latitude'] or t['field_latitude'] or '' }}" data-lng="{{ t['longitude'] or t['field_longitude'] or '' }}"></div>
+    <form method="post" action="{{ url_for('trees.update_tree_location', tree_id=t['id']) }}" class="tree-location-form" id="tree-location-form-{{ t['id'] }}" style="display:none; margin-top:8px;">
+      <input type="hidden" name="latitude" id="tree-lat-{{ t['id'] }}">
+      <input type="hidden" name="longitude" id="tree-lng-{{ t['id'] }}">
+      <button class="btn" type="submit">Αποθήκευση θέσης</button>
+    </form>
+
     <form method="post" action="{{ url_for('trees.add_update', tree_id=t['id']) }}" enctype="multipart/form-data" style="margin-top:12px;">
       <label>Νέα ενημέρωση προόδου (θα τη βλέπει ο πελάτης)</label>
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -51,4 +80,84 @@
 {% else %}
   <p>Δεν έχεις προσθέσει ακόμα δέντρα προς υιοθεσία.</p>
 {% endif %}
+{% endblock %}
+{% block extra_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+  // --- Χάρτης νέου δέντρου ---
+  var newMap = L.map('new-tree-map').setView([38.2, 23.8], 6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19, attribution: '&copy; OpenStreetMap συνεισφέροντες'
+  }).addTo(newMap);
+  var newMarker = null;
+  var newLat = document.getElementById('new-tree-lat');
+  var newLng = document.getElementById('new-tree-lng');
+
+  function setNewMarker(lat, lng){
+    if (newMarker) { newMarker.setLatLng([lat, lng]); }
+    else { newMarker = L.marker([lat, lng], {draggable:true}).addTo(newMap);
+      newMarker.on('dragend', function(){ var p = newMarker.getLatLng(); newLat.value = p.lat.toFixed(6); newLng.value = p.lng.toFixed(6); });
+    }
+    newLat.value = lat.toFixed(6);
+    newLng.value = lng.toFixed(6);
+  }
+  newMap.on('click', function(e){ setNewMarker(e.latlng.lat, e.latlng.lng); });
+
+  // Όταν επιλέγεται κτήμα, κεντράρισε στη θέση του (αν έχει)
+  document.getElementById('new-tree-field').addEventListener('change', function(){
+    var opt = this.options[this.selectedIndex];
+    var lat = parseFloat(opt.getAttribute('data-lat'));
+    var lng = parseFloat(opt.getAttribute('data-lng'));
+    if (!isNaN(lat) && !isNaN(lng)) { newMap.setView([lat, lng], 14); }
+  });
+
+  // --- Χάρτες ανά υπάρχον δέντρο (ανοίγουν κατόπιν κλικ) ---
+  var initializedMaps = {};
+  document.querySelectorAll('.toggle-tree-map').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var treeId = btn.getAttribute('data-tree');
+      var mapDiv = document.getElementById('tree-map-' + treeId);
+      var formDiv = document.getElementById('tree-location-form-' + treeId);
+      var isOpen = mapDiv.classList.toggle('open');
+      formDiv.style.display = isOpen ? 'block' : 'none';
+
+      if (isOpen && !initializedMaps[treeId]) {
+        var lat = parseFloat(mapDiv.getAttribute('data-lat'));
+        var lng = parseFloat(mapDiv.getAttribute('data-lng'));
+        var hasCoords = !isNaN(lat) && !isNaN(lng);
+        var startLat = hasCoords ? lat : 38.2;
+        var startLng = hasCoords ? lng : 23.8;
+
+        var tmap = L.map(mapDiv).setView([startLat, startLng], hasCoords ? 15 : 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19, attribution: '&copy; OpenStreetMap συνεισφέροντες'
+        }).addTo(tmap);
+
+        var latField = document.getElementById('tree-lat-' + treeId);
+        var lngField = document.getElementById('tree-lng-' + treeId);
+        var tmarker = hasCoords ? L.marker([startLat, startLng], {draggable:true}).addTo(tmap) : null;
+
+        function markMoved(la, ln){ latField.value = la; lngField.value = ln; }
+        if (tmarker) {
+          markMoved(startLat, startLng);
+          tmarker.on('dragend', function(){ var p = tmarker.getLatLng(); markMoved(p.lat, p.lng); });
+        }
+        tmap.on('click', function(e){
+          if (tmarker) { tmarker.setLatLng(e.latlng); }
+          else { tmarker = L.marker(e.latlng, {draggable:true}).addTo(tmap);
+            tmarker.on('dragend', function(){ var p = tmarker.getLatLng(); markMoved(p.lat, p.lng); });
+          }
+          markMoved(e.latlng.lat, e.latlng.lng);
+        });
+
+        initializedMaps[treeId] = tmap;
+        setTimeout(function(){ tmap.invalidateSize(); }, 150);
+      } else if (isOpen) {
+        setTimeout(function(){ initializedMaps[treeId].invalidateSize(); }, 150);
+      }
+    });
+  });
+})();
+</script>
 {% endblock %}

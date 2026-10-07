@@ -10,6 +10,7 @@ import auth
 import fields
 import stats
 import trees
+import advisor
 
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
 
@@ -26,6 +27,7 @@ def create_app():
     app.register_blueprint(fields.bp)
     app.register_blueprint(stats.bp)
     app.register_blueprint(trees.bp)
+    app.register_blueprint(advisor.bp)
 
     @app.context_processor
     def inject_globals():

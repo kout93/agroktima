@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS fields (
     area_stremma REAL,
     crop        TEXT,
     tree_count  INTEGER DEFAULT 0,
+    latitude    REAL,
+    longitude   REAL,
     created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -44,6 +46,8 @@ CREATE TABLE IF NOT EXISTS trees (
     price_per_year   REAL NOT NULL,
     status           TEXT NOT NULL DEFAULT 'available' CHECK (status IN ('available', 'adopted')),
     photo_notes      TEXT,
+    latitude         REAL,
+    longitude        REAL,
     created_at       TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -68,6 +72,16 @@ CREATE TABLE IF NOT EXISTS production_updates (
     created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS advisor_messages (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    farmer_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    question    TEXT NOT NULL,
+    answer      TEXT NOT NULL,
+    is_ai       INTEGER NOT NULL DEFAULT 0,
+    created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_advisor_farmer ON advisor_messages(farmer_id);
 CREATE INDEX IF NOT EXISTS idx_fields_farmer ON fields(farmer_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_field ON tasks(field_id);
 CREATE INDEX IF NOT EXISTS idx_trees_farmer ON trees(farmer_id);

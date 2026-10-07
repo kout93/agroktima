@@ -1,12 +1,21 @@
 {% extends "base.html" %}
 {% block title %}Νέο κτήμα{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  #picker-map{ height:280px; border-radius:10px; border:1px solid var(--line); margin-top:6px; }
+  .coord-row{ display:flex; gap:8px; }
+  .coord-row input{ flex:1; }
+  .map-hint{ font-size:.8rem; color:var(--ink-soft); margin:6px 0 0; }
+</style>
+{% endblock %}
 {% block content %}
-<div class="card" style="max-width:480px;">
+<div class="card" style="max-width:520px;">
   <h1>Νέο κτήμα</h1>
-  <form method="post">
+  <form method="post" id="field-form">
     <label>Όνομα κτήματος</label>
     <input type="text" name="name" placeholder='π.χ. Ελαιώνας "Παλιάμπελο"' required>
-    <label>Τοποθεσία</label>
+    <label>Τοποθεσία (περιγραφή)</label>
     <input type="text" name="location" placeholder="π.χ. Καλαμάτα">
     <label>Έκταση (στρέμματα)</label>
     <input type="number" step="0.1" name="area_stremma">
@@ -14,7 +23,72 @@
     <input type="text" name="crop" placeholder="π.χ. Ελιά Καλαμών">
     <label>Αριθμός δέντρων</label>
     <input type="number" name="tree_count">
+
+    <label>Σημείο στον χάρτη (προαιρετικό)</label>
+    <div id="picker-map"></div>
+    <p class="map-hint">Κάνε κλικ στον χάρτη για να σημαδέψεις το κτήμα, ή πληκτρολόγησε συντεταγμένες απευθείας.</p>
+    <div class="coord-row" style="margin-top:8px;">
+      <input type="number" step="any" name="latitude" id="latitude" placeholder="Γεωγραφικό πλάτος">
+      <input type="number" step="any" name="longitude" id="longitude" placeholder="Γεωγραφικό μήκος">
+    </div>
+    <button type="button" class="btn ghost" id="locate-btn" style="margin-top:8px;">📍 Χρήση της τρέχουσας θέσης μου</button>
+
     <button class="btn" type="submit">Αποθήκευση</button>
   </form>
 </div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+  var startLat = 38.2, startLng = 23.8; // κέντρο Ελλάδας ως προεπιλογή
+  var map = L.map('picker-map').setView([startLat, startLng], 6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap συνεισφέροντες'
+  }).addTo(map);
+
+  var marker = null;
+  var latInput = document.getElementById('latitude');
+  var lngInput = document.getElementById('longitude');
+
+  function setMarker(lat, lng){
+    if (marker) { marker.setLatLng([lat, lng]); }
+    else { marker = L.marker([lat, lng], {draggable:true}).addTo(map);
+      marker.on('dragend', function(){
+        var p = marker.getLatLng();
+        latInput.value = p.lat.toFixed(6);
+        lngInput.value = p.lng.toFixed(6);
+      });
+    }
+    latInput.value = lat.toFixed(6);
+    lngInput.value = lng.toFixed(6);
+  }
+
+  map.on('click', function(e){
+    setMarker(e.latlng.lat, e.latlng.lng);
+  });
+
+  // Αν ο χρήστης πληκτρολογήσει χειροκίνητα, ενημέρωσε τον χάρτη
+  function syncFromInputs(){
+    var lat = parseFloat(latInput.value), lng = parseFloat(lngInput.value);
+    if (!isNaN(lat) && !isNaN(lng)) {
+      setMarker(lat, lng);
+      map.setView([lat, lng], 14);
+    }
+  }
+  latInput.addEventListener('change', syncFromInputs);
+  lngInput.addEventListener('change', syncFromInputs);
+
+  document.getElementById('locate-btn').addEventListener('click', function(){
+    if (!navigator.geolocation) { alert('Ο browser δεν υποστηρίζει εντοπισμό θέσης.'); return; }
+    navigator.geolocation.getCurrentPosition(function(pos){
+      setMarker(pos.coords.latitude, pos.coords.longitude);
+      map.setView([pos.coords.latitude, pos.coords.longitude], 15);
+    }, function(){
+      alert('Δεν ήταν δυνατή η λήψη της τρέχουσας θέσης.');
+    });
+  });
+})();
+</script>
 {% endblock %}

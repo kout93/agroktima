@@ -22,6 +22,21 @@ def list_fields():
     return render_template("fields/list.html", fields=rows)
 
 
+@bp.route("/map")
+@role_required("farmer")
+def fields_map():
+    """Συνολικός χάρτης με όλα τα κτήματα που έχουν σημειωμένη τοποθεσία."""
+    db = get_db()
+    user = current_user()
+    rows = db.execute(
+        """SELECT id, name, location, latitude, longitude FROM fields
+           WHERE farmer_id = ? AND latitude IS NOT NULL AND longitude IS NOT NULL
+           ORDER BY created_at DESC""",
+        (user["id"],),
+    ).fetchall()
+    return render_template("fields/map.html", fields=rows)
+
+
 @bp.route("/new", methods=["GET", "POST"])
 @role_required("farmer")
 def new_field():
@@ -31,6 +46,8 @@ def new_field():
         area = request.form.get("area_stremma", "").strip()
         crop = request.form.get("crop", "").strip()
         tree_count = request.form.get("tree_count", "").strip()
+        latitude = request.form.get("latitude", "").strip()
+        longitude = request.form.get("longitude", "").strip()
 
         if not name:
             flash("Το όνομα του κτήματος είναι υποχρεωτικό.", "error")
@@ -38,8 +55,8 @@ def new_field():
 
         db = get_db()
         db.execute(
-            """INSERT INTO fields (farmer_id, name, location, area_stremma, crop, tree_count)
-               VALUES (?, ?, ?, ?, ?, ?)""",
+            """INSERT INTO fields (farmer_id, name, location, area_stremma, crop, tree_count, latitude, longitude)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 current_user()["id"],
                 name,
@@ -47,6 +64,8 @@ def new_field():
                 float(area) if area else None,
                 crop or None,
                 int(tree_count) if tree_count else 0,
+                float(latitude) if latitude else None,
+                float(longitude) if longitude else None,
             ),
         )
         db.commit()
@@ -76,6 +95,33 @@ def view_field(field_id):
     return render_template(
         "fields/view.html", field=field, tasks=tasks, total_cost=total_cost, task_types=TASK_TYPES
     )
+
+
+@bp.route("/<int:field_id>/location", methods=["POST"])
+@role_required("farmer")
+def update_location(field_id):
+    db = get_db()
+    user = current_user()
+    field = db.execute(
+        "SELECT * FROM fields WHERE id = ? AND farmer_id = ?", (field_id, user["id"])
+    ).fetchone()
+    if field is None:
+        flash("Το κτήμα δεν βρέθηκε.", "error")
+        return redirect(url_for("fields.list_fields"))
+
+    latitude = request.form.get("latitude", "").strip()
+    longitude = request.form.get("longitude", "").strip()
+    if not latitude or not longitude:
+        flash("Σημείωσε ένα σημείο στον χάρτη πρώτα.", "error")
+        return redirect(url_for("fields.view_field", field_id=field_id))
+
+    db.execute(
+        "UPDATE fields SET latitude = ?, longitude = ? WHERE id = ?",
+        (float(latitude), float(longitude), field_id),
+    )
+    db.commit()
+    flash("Η τοποθεσία του κτήματος ενημερώθηκε.", "success")
+    return redirect(url_for("fields.view_field", field_id=field_id))
 
 
 @bp.route("/<int:field_id>/tasks/new", methods=["POST"])

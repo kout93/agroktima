@@ -1,8 +1,17 @@
 {% extends "base.html" %}
 {% block title %}Υιοθέτησε Δέντρο{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>#trees-overview-map{ height:320px; border-radius:10px; border:1px solid var(--line); margin-bottom:22px; }</style>
+{% endblock %}
 {% block content %}
 <h1>Υιοθέτησε ένα δέντρο ελιάς</h1>
 <p>Πλήρωσε την ετήσια συνδρομή ενός δέντρου και πάρε στο τέλος της σεζόν το λάδι που παρήγαγε.</p>
+
+{% set mapped_trees = trees|selectattr('display_latitude')|list %}
+{% if mapped_trees %}
+<div id="trees-overview-map"></div>
+{% endif %}
 
 {% if trees %}
   {% for t in trees %}
@@ -13,6 +22,7 @@
         {{ t['farmer_name'] }}{% if t['field_location'] %} · {{ t['field_location'] }}{% endif %}
         {% if t['est_oil_kg_min'] %} · {{ t['est_oil_kg_min'] }}–{{ t['est_oil_kg_max'] }} kg λάδι/έτος{% endif %}
         · {{ "%.2f"|format(t['price_per_year']) }}€/έτος
+        {% if t['display_latitude'] %} · 📍 με σημείο στον χάρτη{% endif %}
       </div>
     </div>
     <a class="btn soil" href="{{ url_for('trees.view_tree', tree_id=t['id']) }}">Δες περισσότερα</a>
@@ -20,5 +30,32 @@
   {% endfor %}
 {% else %}
   <p>Δεν υπάρχουν αυτή τη στιγμή διαθέσιμα δέντρα.</p>
+{% endif %}
+{% endblock %}
+{% block extra_scripts %}
+{% if mapped_trees %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+  var points = [
+    {% for t in mapped_trees %}
+    {lat: {{ t['display_latitude'] }}, lng: {{ t['display_longitude'] }}, code: {{ t['code']|tojson }}, url: {{ url_for('trees.view_tree', tree_id=t['id'])|tojson }}},
+    {% endfor %}
+  ];
+  var map = L.map('trees-overview-map');
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19, attribution: '&copy; OpenStreetMap συνεισφέροντες'
+  }).addTo(map);
+
+  var group = [];
+  points.forEach(function(p){
+    var m = L.marker([p.lat, p.lng]).addTo(map);
+    m.bindPopup('<strong>' + p.code + '</strong><br><a href="' + p.url + '">Δες το δέντρο</a>');
+    group.push(m);
+  });
+  if (group.length === 1) { map.setView([points[0].lat, points[0].lng], 13); }
+  else { map.fitBounds(L.featureGroup(group).getBounds().pad(0.2)); }
+})();
+</script>
 {% endif %}
 {% endblock %}

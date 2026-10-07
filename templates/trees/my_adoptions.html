@@ -1,5 +1,7 @@
 {% extends "base.html" %}
+{% import "_map_macros.html" as maps %}
 {% block title %}Οι υιοθεσίες μου{% endblock %}
+{% block extra_head %}{{ maps.leaflet_head() }}{% endblock %}
 {% block content %}
 <h1>Οι υιοθεσίες μου</h1>
 
@@ -7,11 +9,14 @@
   {% for a in adoptions %}
   <div class="card">
     <h3 style="margin-bottom:4px;">🫒 {{ a['code'] }} <span class="badge {{ 'adopted' if a['status']=='paid' else 'available' }}">{{ 'Πληρωμένο' if a['status']=='paid' else ('Εκκρεμεί' if a['status']=='pending' else 'Ακυρώθηκε') }}</span></h3>
-    <p style="margin:0; font-size:.88rem;">
+    <p style="margin:0 0 10px; font-size:.88rem;">
       Παραγωγός: {{ a['farmer_name'] }}{% if a['field_name'] %} · {{ a['field_name'] }}{% endif %}
       · Σεζόν {{ a['season_year'] }} · {{ "%.2f"|format(a['amount']) }}€
       {% if a['est_oil_kg_min'] %} · {{ a['est_oil_kg_min'] }}–{{ a['est_oil_kg_max'] }} kg λάδι αναμενόμενα{% endif %}
     </p>
+    {% if a['display_latitude'] and a['display_longitude'] %}
+      {{ maps.static_map('adoption-map-' ~ a['id'], a['display_latitude'], a['display_longitude'], a['code']) }}
+    {% endif %}
   </div>
   {% endfor %}
 {% else %}
@@ -19,3 +24,4 @@
   <a class="btn" href="{{ url_for('trees.browse') }}">Δες διαθέσιμα δέντρα</a>
 {% endif %}
 {% endblock %}
+{% block extra_scripts %}{{ maps.leaflet_script() }}{% endblock %}

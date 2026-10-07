@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Χάρτης κτημάτων{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>#overview-map{ height:420px; border-radius:10px; border:1px solid var(--line); }</style>
+{% endblock %}
+{% block content %}
+<h1>Χάρτης κτημάτων</h1>
+{% if fields %}
+<div id="overview-map"></div>
+{% else %}
+<p>Δεν έχεις σημειώσει ακόμα θέση σε κανένα κτήμα. <a href="{{ url_for('fields.list_fields') }}">Άνοιξε ένα κτήμα</a> και σημάδεψέ το στον χάρτη.</p>
+{% endif %}
+{% endblock %}
+{% block extra_scripts %}
+{% if fields %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+  var points = [
+    {% for f in fields %}
+    {lat: {{ f['latitude'] }}, lng: {{ f['longitude'] }}, name: {{ f['name']|tojson }}, location: {{ (f['location'] or '')|tojson }}},
+    {% endfor %}
+  ];
+  var map = L.map('overview-map');
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap συνεισφέροντες'
+  }).addTo(map);
+
+  var group = [];
+  points.forEach(function(p){
+    var m = L.marker([p.lat, p.lng]).addTo(map);
+    m.bindPopup('<strong>' + p.name + '</strong>' + (p.location ? '<br>' + p.location : ''));
+    group.push(m);
+  });
+
+  if (group.length === 1) {
+    map.setView([points[0].lat, points[0].lng], 14);
+  } else {
+    var fg = L.featureGroup(group);
+    map.fitBounds(fg.getBounds().pad(0.2));
+  }
+})();
+</script>
+{% endif %}
+{% endblock %}

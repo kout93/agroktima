@@ -39,6 +39,10 @@ def init_db():
     # Μικρά migrations για βάσεις που δημιουργήθηκαν με παλιότερη έκδοση του schema:
     _ensure_column(conn, "tasks", "photo_filename", "TEXT")
     _ensure_column(conn, "production_updates", "photo_filename", "TEXT")
+    _ensure_column(conn, "fields", "latitude", "REAL")
+    _ensure_column(conn, "fields", "longitude", "REAL")
+    _ensure_column(conn, "trees", "latitude", "REAL")
+    _ensure_column(conn, "trees", "longitude", "REAL")
     conn.commit()
     conn.close()
 
