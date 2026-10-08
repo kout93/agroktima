@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% import "_map_macros.html" as maps %}
+{% block title %}{{ hive['code'] }}{% endblock %}
+{% block extra_head %}{{ maps.leaflet_head() }}{% endblock %}
+{% block content %}
+<div class="tree-photo-wrap" style="border-radius:14px; margin-bottom:18px; box-shadow:var(--shadow-md); max-height:340px;">
+  <img src="{{ url_for('static', filename='uploads/' + hive['photo_filename']) if hive['photo_filename'] else 'https://images.pexels.com/photos/17543926/pexels-photo-17543926.jpeg?auto=compress&cs=tinysrgb&w=1200' }}" alt="{{ hive['code'] }}" style="max-height:340px;">
+</div>
+<h1>🐝 {{ hive['code'] }}</h1>
+<p>
+  {{ _('Παραγωγός:') }} {{ hive['farmer_name'] }}
+  {% if hive['field_location'] %} · {{ hive['field_location'] }}{% endif %}
+  {% if hive['field_name'] %} · {{ hive['field_name'] }}{% endif %}
+</p>
+
+<div class="stat-row">
+  {% if hive['est_honey_kg_min'] %}
+  <div class="stat">
+    <div class="stat-num">{{ hive['est_honey_kg_min'] }}–{{ hive['est_honey_kg_max'] }} kg</div>
+    <div class="stat-label">{{ _('Εκτιμώμενη παραγωγή μελιού/έτος') }}</div>
+  </div>
+  {% endif %}
+  <div class="stat">
+    <div class="stat-num">{{ "%.2f"|format(hive['price_per_year']) }}€</div>
+    <div class="stat-label">{{ _('Τιμή υιοθεσίας/έτος') }}</div>
+  </div>
+</div>
+
+{% if hive['status'] == 'available' %}
+  {% if current_user and current_user['role'] == 'customer' %}
+  <form method="post" action="{{ url_for('hives.adopt', hive_id=hive['id']) }}">
+    <button class="btn soil" type="submit">{{ _('Υιοθέτησε αυτή την κυψέλη — %(price).2f€', price=hive['price_per_year']) }}</button>
+  </form>
+  {% elif current_user %}
+  <p><em>{{ _('Η υιοθεσία είναι διαθέσιμη μόνο για λογαριασμούς πελάτη.') }}</em></p>
+  {% else %}
+  <a class="btn soil" href="{{ url_for('auth.login', next=request.path) }}">{{ _('Σύνδεση για υιοθεσία') }}</a>
+  {% endif %}
+{% else %}
+  <p><span class="badge adopted">{{ _('Υιοθετημένο') }}</span> {{ _('Αυτή η κυψέλη έχει ήδη υιοθετηθεί.') }}</p>
+{% endif %}
+
+{% if hive['display_latitude'] and hive['display_longitude'] %}
+<div class="card">
+  <h2>{{ _('Πού βρίσκεται') }}</h2>
+  {{ maps.static_map('hive-location-map', hive['display_latitude'], hive['display_longitude'], hive['code']) }}
+</div>
+{% endif %}
+
+<div class="card">
+  <h2>{{ _('Ενημερώσεις προόδου') }}</h2>
+  {% if updates %}
+    {% for u in updates %}
+    <div style="margin-bottom:16px;">
+      <p style="margin-bottom:6px;"><strong>{{ u['update_date'] }}</strong> — {{ u['message'] }}</p>
+      {% if u['photo_filename'] %}
+      <img src="{{ url_for('static', filename='uploads/' + u['photo_filename']) }}" alt="{{ _('Φωτογραφία ενημέρωσης') }}" style="max-width:100%; border-radius:10px; border:1px solid var(--line);">
+      {% endif %}
+    </div>
+    {% endfor %}
+  {% else %}
+    <p>{{ _('Δεν υπάρχουν ακόμα ενημερώσεις.') }}</p>
+  {% endif %}
+</div>
+{% endblock %}
+{% block extra_scripts %}{{ maps.leaflet_script() }}{% endblock %}

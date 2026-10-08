@@ -8,13 +8,13 @@
 {% if adoptions %}
   {% for a in adoptions %}
   <div class="card" style="display:flex; gap:16px; align-items:flex-start;">
-    <img src="{{ url_for('static', filename='uploads/' + a['photo_filename']) if a['photo_filename'] else 'https://images.pexels.com/photos/6184912/pexels-photo-6184912.jpeg?auto=compress&cs=tinysrgb&w=400' }}" alt="{{ a['code'] }}" style="width:84px; height:84px; border-radius:12px; object-fit:cover; flex-shrink:0; box-shadow:var(--shadow-sm);">
+    <img src="{{ url_for('static', filename='uploads/' + a['photo_filename']) if a['photo_filename'] else ('https://images.pexels.com/photos/17543926/pexels-photo-17543926.jpeg?auto=compress&cs=tinysrgb&w=400' if a['kind'] == 'hive' else 'https://images.pexels.com/photos/6184912/pexels-photo-6184912.jpeg?auto=compress&cs=tinysrgb&w=400') }}" alt="{{ a['code'] }}" style="width:84px; height:84px; border-radius:12px; object-fit:cover; flex-shrink:0; box-shadow:var(--shadow-sm);">
     <div style="flex:1; min-width:0;">
-      <h3 style="margin-bottom:4px;">🫒 {{ a['code'] }} <span class="badge {{ 'adopted' if a['status']=='paid' else 'available' }}">{{ _('Πληρωμένο') if a['status']=='paid' else (_('Εκκρεμεί') if a['status']=='pending' else _('Ακυρώθηκε')) }}</span></h3>
+      <h3 style="margin-bottom:4px;">{{ '🐝' if a['kind'] == 'hive' else '🫒' }} {{ a['code'] }} <span class="badge {{ 'adopted' if a['status']=='paid' else 'available' }}">{{ _('Πληρωμένο') if a['status']=='paid' else (_('Εκκρεμεί') if a['status']=='pending' else _('Ακυρώθηκε')) }}</span></h3>
       <p style="margin:0 0 10px; font-size:.88rem;">
         {{ _('Παραγωγός:') }} {{ a['farmer_name'] }}{% if a['field_name'] %} · {{ a['field_name'] }}{% endif %}
         · {{ _('Σεζόν') }} {{ a['season_year'] }} · {{ "%.2f"|format(a['amount']) }}€
-        {% if a['est_oil_kg_min'] %} · {{ a['est_oil_kg_min'] }}–{{ a['est_oil_kg_max'] }} {{ _('kg λάδι αναμενόμενα') }}{% endif %}
+        {% if a['est_oil_kg_min'] %} · {{ a['est_oil_kg_min'] }}–{{ a['est_oil_kg_max'] }} {{ _('kg μέλι αναμενόμενα') if a['kind'] == 'hive' else _('kg λάδι αναμενόμενα') }}{% endif %}
       </p>
       {% if a['display_latitude'] and a['display_longitude'] %}
         {{ maps.static_map('adoption-map-' ~ a['id'], a['display_latitude'], a['display_longitude'], a['code']) }}
@@ -23,8 +23,9 @@
   </div>
   {% endfor %}
 {% else %}
-  <p>{{ _('Δεν έχεις υιοθετήσει ακόμα κάποιο δέντρο.') }}</p>
+  <p>{{ _('Δεν έχεις υιοθετήσει ακόμα κάποιο δέντρο ή κυψέλη.') }}</p>
   <a class="btn" href="{{ url_for('trees.browse') }}">{{ _('Δες διαθέσιμα δέντρα') }}</a>
+  <a class="btn ghost" href="{{ url_for('hives.browse') }}">{{ _('Δες διαθέσιμες κυψέλες') }}</a>
 {% endif %}
 {% endblock %}
 {% block extra_scripts %}{{ maps.leaflet_script() }}{% endblock %}

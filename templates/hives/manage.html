@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block title %}Μελίσσια προς υιοθεσία{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  #new-hive-map{ height:220px; border-radius:10px; border:1px solid var(--line); margin-top:6px; }
+  .hive-map{ height:200px; border-radius:10px; border:1px solid var(--line); margin-top:8px; display:none; }
+  .hive-map.open{ display:block; }
+</style>
+{% endblock %}
+{% block content %}
+<h1>Μελίσσια προς υιοθεσία</h1>
+<p style="font-size:.86rem; color:var(--ink-soft);">Η παραγωγή μελιού καταγράφεται σαν συγκομιδή στο κτήμα σου (είδος «Μέλι») — εδώ διαχειρίζεσαι τις κυψέλες προς υιοθεσία και τις ενημερώσεις τους.</p>
+
+<div class="card">
+  <h2>Νέα κυψέλη</h2>
+  <form method="post" action="{{ url_for('hives.new_hive') }}" id="new-hive-form" enctype="multipart/form-data">
+    <label>Κωδικός κυψέλης</label>
+    <input type="text" name="code" placeholder="π.χ. Κυψέλη #3 — Παλιάμπελο" required>
+    <label>Φωτογραφία κυψέλης (προαιρετικό)</label>
+    <input type="file" name="photo" accept="image/*" capture="environment">
+    <p style="font-size:.8rem; color:var(--ink-soft); margin-top:4px;">Αν δεν ανεβάσεις φωτογραφία, θα εμφανίζεται μια προεπιλεγμένη εικόνα κυψέλης.</p>
+    <label>Κτήμα</label>
+    <select name="field_id" id="new-hive-field">
+      <option value="">— χωρίς σύνδεση —</option>
+      {% for f in fields %}
+      <option value="{{ f['id'] }}" data-lat="{{ f['latitude'] or '' }}" data-lng="{{ f['longitude'] or '' }}">{{ f['name'] }}</option>
+      {% endfor %}
+    </select>
+    <label>Εκτιμώμενη παραγωγή μελιού (κιλά/έτος)</label>
+    <div style="display:flex; gap:8px;">
+      <input type="number" step="0.1" name="est_honey_kg_min" placeholder="από">
+      <input type="number" step="0.1" name="est_honey_kg_max" placeholder="έως">
+    </div>
+    <label>Τιμή υιοθεσίας (€/έτος)</label>
+    <input type="number" step="0.01" name="price_per_year" required>
+
+    <label>Ακριβές σημείο της κυψέλης (προαιρετικό)</label>
+    <div id="new-hive-map"></div>
+    <p style="font-size:.8rem; color:var(--ink-soft); margin-top:6px;">Αν δεν σημαδέψεις σημείο, η κυψέλη θα εμφανίζεται στη θέση του κτήματος.</p>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <input type="number" step="any" name="latitude" id="new-hive-lat" placeholder="Γεωγραφικό πλάτος" style="flex:1;">
+      <input type="number" step="any" name="longitude" id="new-hive-lng" placeholder="Γεωγραφικό μήκος" style="flex:1;">
+    </div>
+
+    <button class="btn" type="submit">Προσθήκη</button>
+  </form>
+</div>
+
+{% if hives %}
+  {% for h in hives %}
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+      <div style="display:flex; gap:12px; align-items:center; min-width:0;">
+        <img class="tree-thumb" src="{{ url_for('static', filename='uploads/' + h['photo_filename']) if h['photo_filename'] else 'https://images.pexels.com/photos/17543926/pexels-photo-17543926.jpeg?auto=compress&cs=tinysrgb&w=200' }}" alt="{{ h['code'] }}">
+        <div>
+          <h3 style="margin-bottom:4px;">{{ h['code'] }} <span class="badge {{ h['status'] }}">{{ 'Υιοθετημένο' if h['status'] == 'adopted' else 'Διαθέσιμο' }}</span></h3>
+          <p style="margin:0; font-size:.88rem;">
+            {{ h['field_name'] or 'Χωρίς κτήμα' }} · {{ "%.2f"|format(h['price_per_year']) }}€/έτος
+            {% if h['est_honey_kg_min'] %} · {{ h['est_honey_kg_min'] }}–{{ h['est_honey_kg_max'] }} kg μέλι/έτος{% endif %}
+            {% if h['latitude'] %} · 📍 έχει σημείο{% endif %}
+          </p>
+        </div>
+      </div>
+      <button type="button" class="btn ghost toggle-hive-map" data-hive="{{ h['id'] }}" style="margin-top:0; white-space:nowrap;">
+        {{ 'Αλλαγή θέσης' if h['latitude'] else '📍 Όρισε θέση' }}
+      </button>
+    </div>
+
+    <form method="post" action="{{ url_for('hives.update_hive_photo', hive_id=h['id']) }}" enctype="multipart/form-data" style="margin-top:12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+      <input type="file" name="photo" accept="image/*" capture="environment" style="flex:1; min-width:160px;">
+      <button class="btn ghost" type="submit" style="margin-top:0; white-space:nowrap;">{{ 'Αλλαγή φωτογραφίας' if h['photo_filename'] else 'Προσθήκη φωτογραφίας' }}</button>
+    </form>
+
+    <div class="hive-map" id="hive-map-{{ h['id'] }}" data-lat="{{ h['latitude'] or h['field_latitude'] or '' }}" data-lng="{{ h['longitude'] or h['field_longitude'] or '' }}"></div>
+    <form method="post" action="{{ url_for('hives.update_hive_location', hive_id=h['id']) }}" class="hive-location-form" id="hive-location-form-{{ h['id'] }}" style="display:none; margin-top:8px;">
+      <input type="hidden" name="latitude" id="hive-lat-{{ h['id'] }}">
+      <input type="hidden" name="longitude" id="hive-lng-{{ h['id'] }}">
+      <button class="btn" type="submit">Αποθήκευση θέσης</button>
+    </form>
+
+    <form method="post" action="{{ url_for('hives.add_update', hive_id=h['id']) }}" enctype="multipart/form-data" style="margin-top:12px;">
+      <label>Νέα ενημέρωση/επιθεώρηση (θα τη βλέπει ο πελάτης)</label>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <input type="text" name="message" placeholder="π.χ. Επιθεώρηση κυψέλης — καλή ανάπτυξη" style="flex:1; min-width:160px;">
+        <input type="file" name="photo" accept="image/*" capture="environment" style="flex:1; min-width:160px;">
+        <button class="btn ghost" type="submit" style="margin-top:0; white-space:nowrap;">Προσθήκη</button>
+      </div>
+    </form>
+  </div>
+  {% endfor %}
+{% else %}
+  <p>Δεν έχεις προσθέσει ακόμα κυψέλες προς υιοθεσία.</p>
+{% endif %}
+{% endblock %}
+{% block extra_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+  // --- Χάρτης νέας κυψέλης ---
+  var newMap = L.map('new-hive-map').setView([38.2, 23.8], 6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19, attribution: '&copy; OpenStreetMap συνεισφέροντες'
+  }).addTo(newMap);
+  var newMarker = null;
+  var newLat = document.getElementById('new-hive-lat');
+  var newLng = document.getElementById('new-hive-lng');
+
+  function setNewMarker(lat, lng){
+    if (newMarker) { newMarker.setLatLng([lat, lng]); }
+    else { newMarker = L.marker([lat, lng], {draggable:true}).addTo(newMap);
+      newMarker.on('dragend', function(){ var p = newMarker.getLatLng(); newLat.value = p.lat.toFixed(6); newLng.value = p.lng.toFixed(6); });
+    }
+    newLat.value = lat.toFixed(6);
+    newLng.value = lng.toFixed(6);
+  }
+  newMap.on('click', function(e){ setNewMarker(e.latlng.lat, e.latlng.lng); });
+
+  document.getElementById('new-hive-field').addEventListener('change', function(){
+    var opt = this.options[this.selectedIndex];
+    var lat = parseFloat(opt.getAttribute('data-lat'));
+    var lng = parseFloat(opt.getAttribute('data-lng'));
+    if (!isNaN(lat) && !isNaN(lng)) { newMap.setView([lat, lng], 14); }
+  });
+
+  // --- Χάρτες ανά υπάρχουσα κυψέλη (ανοίγουν κατόπιν κλικ) ---
+  var initializedMaps = {};
+  document.querySelectorAll('.toggle-hive-map').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var hiveId = btn.getAttribute('data-hive');
+      var mapDiv = document.getElementById('hive-map-' + hiveId);
+      var formDiv = document.getElementById('hive-location-form-' + hiveId);
+      var isOpen = mapDiv.classList.toggle('open');
+      formDiv.style.display = isOpen ? 'block' : 'none';
+
+      if (isOpen && !initializedMaps[hiveId]) {
+        var lat = parseFloat(mapDiv.getAttribute('data-lat'));
+        var lng = parseFloat(mapDiv.getAttribute('data-lng'));
+        var hasCoords = !isNaN(lat) && !isNaN(lng);
+        var startLat = hasCoords ? lat : 38.2;
+        var startLng = hasCoords ? lng : 23.8;
+
+        var hmap = L.map(mapDiv).setView([startLat, startLng], hasCoords ? 15 : 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19, attribution: '&copy; OpenStreetMap συνεισφέροντες'
+        }).addTo(hmap);
+
+        var latField = document.getElementById('hive-lat-' + hiveId);
+        var lngField = document.getElementById('hive-lng-' + hiveId);
+        var hmarker = hasCoords ? L.marker([startLat, startLng], {draggable:true}).addTo(hmap) : null;
+
+        function markMoved(la, ln){ latField.value = la; lngField.value = ln; }
+        if (hmarker) {
+          markMoved(startLat, startLng);
+          hmarker.on('dragend', function(){ var p = hmarker.getLatLng(); markMoved(p.lat, p.lng); });
+        }
+        hmap.on('click', function(e){
+          if (hmarker) { hmarker.setLatLng(e.latlng); }
+          else { hmarker = L.marker(e.latlng, {draggable:true}).addTo(hmap);
+            hmarker.on('dragend', function(){ var p = hmarker.getLatLng(); markMoved(p.lat, p.lng); });
+          }
+          markMoved(e.latlng.lat, e.latlng.lng);
+        });
+
+        initializedMaps[hiveId] = hmap;
+        setTimeout(function(){ hmap.invalidateSize(); }, 150);
+      } else if (isOpen) {
+        setTimeout(function(){ initializedMaps[hiveId].invalidateSize(); }, 150);
+      }
+    });
+  });
+})();
+</script>
+{% endblock %}

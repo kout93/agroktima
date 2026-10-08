@@ -33,10 +33,17 @@ if IS_LIVE:
     stripe.api_key = STRIPE_SECRET_KEY
 
 
-def create_checkout_session(adoption, tree, success_url, cancel_url):
+def create_checkout_session(adoption, item, success_url, cancel_url, item_label="δέντρου", test_checkout_prefix="/trees/checkout/test"):
     """
     Δημιουργεί checkout session (πραγματικό Stripe ή test-mode) και επιστρέφει
     το URL όπου πρέπει να ανακατευθυνθεί ο πελάτης.
+
+    item: μία γραμμή (sqlite3.Row ή dict) με τουλάχιστον το πεδίο 'code' —
+    μπορεί να είναι δέντρο ή κυψέλη, οτιδήποτε έχει την ίδια λογική υιοθεσίας.
+    item_label: πώς ονομάζεται το αντικείμενο στην περιγραφή πληρωμής
+    (π.χ. "δέντρου" ή "κυψέλης").
+    test_checkout_prefix: πού οδηγεί η δοκιμαστική πληρωμή όταν δεν υπάρχει
+    πραγματικό κλειδί Stripe (διαφορετικό route ανά τύπο αντικειμένου).
     """
     if IS_LIVE:
         session = stripe.checkout.Session.create(
@@ -47,7 +54,7 @@ def create_checkout_session(adoption, tree, success_url, cancel_url):
                     "price_data": {
                         "currency": "eur",
                         "product_data": {
-                            "name": f"Υιοθεσία δέντρου {tree['code']} — σεζόν {adoption['season_year']}",
+                            "name": f"Υιοθεσία {item_label} {item['code']} — σεζόν {adoption['season_year']}",
                         },
                         "unit_amount": int(round(adoption["amount"] * 100)),
                     },
@@ -61,4 +68,4 @@ def create_checkout_session(adoption, tree, success_url, cancel_url):
         return session.url, session.id
     else:
         # Test mode: πάμε κατευθείαν σε τοπική σελίδα "πληρωμής".
-        return f"/trees/checkout/test/{adoption['id']}", None
+        return f"{test_checkout_prefix}/{adoption['id']}", None

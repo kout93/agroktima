@@ -134,3 +134,48 @@ CREATE INDEX IF NOT EXISTS idx_tasks_field ON tasks(field_id);
 CREATE INDEX IF NOT EXISTS idx_trees_farmer ON trees(farmer_id);
 CREATE INDEX IF NOT EXISTS idx_adoptions_tree ON adoptions(tree_id);
 CREATE INDEX IF NOT EXISTS idx_adoptions_customer ON adoptions(customer_id);
+
+-- Μελίσσια (κυψέλες) προς υιοθεσία — ίδιο μοντέλο με τα δέντρα ελιάς,
+-- αλλά για μέλι αντί για λάδι. Ξεχωριστοί πίνακες (όχι κοινοί με trees/
+-- adoptions/production_updates) ώστε να μη χρειαστεί ριψοκίνδυνη αλλαγή
+-- (ALTER) σε ήδη ζωντανούς πίνακες της παραγωγής.
+CREATE TABLE IF NOT EXISTS hives (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    farmer_id        INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    field_id         INTEGER REFERENCES fields(id) ON DELETE SET NULL,
+    code             TEXT NOT NULL,
+    est_honey_kg_min REAL,
+    est_honey_kg_max REAL,
+    price_per_year   REAL NOT NULL,
+    status           TEXT NOT NULL DEFAULT 'available' CHECK (status IN ('available', 'adopted')),
+    photo_filename   TEXT,
+    latitude         REAL,
+    longitude        REAL,
+    created_at       TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS hive_adoptions (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    hive_id       INTEGER NOT NULL REFERENCES hives(id) ON DELETE CASCADE,
+    customer_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    season_year   INTEGER NOT NULL,
+    amount        REAL NOT NULL,
+    status        TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'paid', 'cancelled')),
+    stripe_session_id TEXT,
+    created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+    paid_at       TEXT
+);
+
+CREATE TABLE IF NOT EXISTS hive_updates (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    hive_id        INTEGER NOT NULL REFERENCES hives(id) ON DELETE CASCADE,
+    update_date    TEXT NOT NULL,
+    message        TEXT NOT NULL,
+    photo_filename TEXT,
+    created_at     TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_hives_farmer ON hives(farmer_id);
+CREATE INDEX IF NOT EXISTS idx_hive_adoptions_hive ON hive_adoptions(hive_id);
+CREATE INDEX IF NOT EXISTS idx_hive_adoptions_customer ON hive_adoptions(customer_id);
+CREATE INDEX IF NOT EXISTS idx_hive_updates_hive ON hive_updates(hive_id);

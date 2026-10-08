@@ -40,6 +40,7 @@
         <a href="{{ url_for('fields.list_fields') }}">{{ _('Κτήματα') }}</a>
         <a href="{{ url_for('fields.fields_map') }}">{{ _('Χάρτης') }}</a>
         <a href="{{ url_for('trees.manage_trees') }}">{{ _('Δέντρα μου') }}</a>
+        <a href="{{ url_for('hives.manage_hives') }}">{{ _('Μελίσσια μου') }}</a>
         <a href="{{ url_for('planner.calendar_view') }}">{{ _('Πλάνο εργασιών') }}</a>
         <a href="{{ url_for('stock.overview') }}">{{ _('Απόθεμα') }}</a>
         <a href="{{ url_for('opekepe.overview') }}">{{ _('ΟΠΕΚΕΠΕ/ΕΛΓΑ') }}</a>
@@ -47,6 +48,7 @@
         <a href="{{ url_for('advisor.ask') }}">{{ _('Συμβουλές AI') }}</a>
       {% else %}
         <a href="{{ url_for('trees.browse') }}">{{ _('Υιοθέτησε Δέντρο') }}</a>
+        <a href="{{ url_for('hives.browse') }}">{{ _('Υιοθέτησε Κυψέλη') }}</a>
         <a href="{{ url_for('trees.my_adoptions') }}">{{ _('Οι Υιοθεσίες μου') }}</a>
       {% endif %}
       <a href="{{ url_for('auth.logout') }}">{{ _('Αποσύνδεση (%(name)s)', name=current_user['name']) }}</a>

@@ -284,8 +284,8 @@ def _mark_adoption_paid(db, adoption):
 def my_adoptions():
     db = get_db()
     user = current_user()
-    rows = db.execute(
-        """SELECT a.*, tr.id AS tree_id, tr.code, tr.est_oil_kg_min, tr.est_oil_kg_max, tr.photo_filename,
+    tree_rows = db.execute(
+        """SELECT a.*, 'tree' AS kind, tr.code, tr.est_oil_kg_min, tr.est_oil_kg_max, tr.photo_filename,
                   COALESCE(tr.latitude, f.latitude) AS display_latitude,
                   COALESCE(tr.longitude, f.longitude) AS display_longitude,
                   f.name AS field_name, u.name AS farmer_name
@@ -293,8 +293,22 @@ def my_adoptions():
            JOIN trees tr ON tr.id = a.tree_id
            LEFT JOIN fields f ON f.id = tr.field_id
            JOIN users u ON u.id = tr.farmer_id
-           WHERE a.customer_id = ?
-           ORDER BY a.created_at DESC""",
+           WHERE a.customer_id = ?""",
         (user["id"],),
     ).fetchall()
+    hive_rows = db.execute(
+        """SELECT a.*, 'hive' AS kind, h.code,
+                  h.est_honey_kg_min AS est_oil_kg_min, h.est_honey_kg_max AS est_oil_kg_max,
+                  h.photo_filename,
+                  COALESCE(h.latitude, f.latitude) AS display_latitude,
+                  COALESCE(h.longitude, f.longitude) AS display_longitude,
+                  f.name AS field_name, u.name AS farmer_name
+           FROM hive_adoptions a
+           JOIN hives h ON h.id = a.hive_id
+           LEFT JOIN fields f ON f.id = h.field_id
+           JOIN users u ON u.id = h.farmer_id
+           WHERE a.customer_id = ?""",
+        (user["id"],),
+    ).fetchall()
+    rows = sorted(list(tree_rows) + list(hive_rows), key=lambda r: r["created_at"], reverse=True)
     return render_template("trees/my_adoptions.html", adoptions=rows)

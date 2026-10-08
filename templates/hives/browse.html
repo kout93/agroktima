@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}{{ _('Υιοθέτησε Κυψέλη') }}{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>#hives-overview-map{ height:320px; border-radius:12px; border:1px solid var(--line); margin-bottom:22px; }</style>
+{% endblock %}
+{% block content %}
+<h1>{{ _('Υιοθέτησε μια κυψέλη') }}</h1>
+<p>{{ _('Πλήρωσε την ετήσια συνδρομή μιας κυψέλης και πάρε στο τέλος της σεζόν το μέλι που παρήγαγε.') }}</p>
+
+{% set mapped_hives = hives|selectattr('display_latitude')|list %}
+{% if mapped_hives %}
+<div id="hives-overview-map"></div>
+{% endif %}
+
+{% if hives %}
+<div class="tree-grid">
+  {% for h in hives %}
+  <a class="tree-card" href="{{ url_for('hives.view_hive', hive_id=h['id']) }}" style="text-decoration:none; color:inherit;">
+    <span class="badge available">{{ _('Διαθέσιμο') }}</span>
+    <div class="tree-photo-wrap">
+      <img src="{{ url_for('static', filename='uploads/' + h['photo_filename']) if h['photo_filename'] else 'https://images.pexels.com/photos/17543926/pexels-photo-17543926.jpeg?auto=compress&cs=tinysrgb&w=800' }}" alt="{{ h['code'] }}" loading="lazy">
+    </div>
+    <div class="tree-body">
+      <h3>🐝 {{ h['code'] }}</h3>
+      <p class="tree-meta">
+        {{ h['farmer_name'] }}{% if h['field_location'] %} · {{ h['field_location'] }}{% endif %}
+        {% if h['est_honey_kg_min'] %}<br>{{ h['est_honey_kg_min'] }}–{{ h['est_honey_kg_max'] }} {{ _('kg μέλι/έτος') }}{% endif %}
+        {% if h['display_latitude'] %} · 📍 {{ _('με σημείο στον χάρτη') }}{% endif %}
+      </p>
+      <div class="tree-price">{{ "%.2f"|format(h['price_per_year']) }}{{ _('€ / έτος') }}</div>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+  <p>{{ _('Δεν υπάρχουν αυτή τη στιγμή διαθέσιμες κυψέλες.') }}</p>
+{% endif %}
+{% endblock %}
+{% block extra_scripts %}
+{% if mapped_hives %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+  var points = [
+    {% for h in mapped_hives %}
+    {lat: {{ h['display_latitude'] }}, lng: {{ h['display_longitude'] }}, code: {{ h['code']|tojson }}, url: {{ url_for('hives.view_hive', hive_id=h['id'])|tojson }}},
+    {% endfor %}
+  ];
+  var streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 23, maxNativeZoom: 19, attribution: '&copy; OpenStreetMap συνεισφέροντες'
+  });
+  var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 24, maxNativeZoom: 19, attribution: 'Πλακίδια &copy; Esri — Source: Esri, Maxar, Earthstar Geographics'
+  });
+  var map = L.map('hives-overview-map', {layers: [satellite], maxZoom: 24});
+  L.control.layers({"Δορυφορικός": satellite, "Δρόμοι (OpenStreetMap)": streets}).addTo(map);
+
+  var group = [];
+  points.forEach(function(p){
+    var m = L.marker([p.lat, p.lng]).addTo(map);
+    m.bindPopup('<strong>' + p.code + '</strong><br><a href="' + p.url + '">{{ _('Δες την κυψέλη') }}</a>');
+    group.push(m);
+  });
+  if (group.length === 1) { map.setView([points[0].lat, points[0].lng], 16); }
+  else { map.fitBounds(L.featureGroup(group).getBounds().pad(0.2)); }
+})();
+</script>
+{% endif %}
+{% endblock %}

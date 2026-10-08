@@ -42,12 +42,14 @@ TRANSLATIONS = {
         "Κτήματα": "Fields",
         "Χάρτης": "Map",
         "Δέντρα μου": "My Trees",
+        "Μελίσσια μου": "My Hives",
         "Πλάνο εργασιών": "Task planner",
         "Απόθεμα": "Stock",
         "ΟΠΕΚΕΠΕ/ΕΛΓΑ": "Subsidy reports",
         "Στατιστικά": "Statistics",
         "Συμβουλές AI": "AI advice",
         "Υιοθέτησε Δέντρο": "Adopt a Tree",
+        "Υιοθέτησε Κυψέλη": "Adopt a Hive",
         "Οι Υιοθεσίες μου": "My Adoptions",
         "Οι υιοθεσίες μου": "My adoptions",
         "Αποσύνδεση (%(name)s)": "Log out (%(name)s)",
@@ -145,6 +147,24 @@ TRANSLATIONS = {
         "Επιβεβαίωση πληρωμής (δοκιμή)": "Confirm payment (test)",
         "🧪 Αυτή είναι δοκιμαστική πληρωμή — δεν θα χρεωθεί καμία πραγματική κάρτα. Όταν προστεθεί κλειδί Stripe, αυτή η σελίδα αντικαθίσταται αυτόματα από το πραγματικό Stripe Checkout.":
             "🧪 This is a test payment — no real card will be charged. Once a Stripe key is added, this page is automatically replaced by real Stripe Checkout.",
+
+        # ---- hives: browse / view / adoptions ----
+        "Υιοθέτησε μια κυψέλη": "Adopt a hive",
+        "Πλήρωσε την ετήσια συνδρομή μιας κυψέλης και πάρε στο τέλος της σεζόν το μέλι που παρήγαγε.":
+            "Pay a hive's yearly fee and receive the honey it produced at the end of the season.",
+        "Δεν υπάρχουν αυτή τη στιγμή διαθέσιμες κυψέλες.": "There are no hives available right now.",
+        "kg μέλι/έτος": "kg honey/year",
+        "Δες την κυψέλη": "See the hive",
+        "Εκτιμώμενη παραγωγή μελιού/έτος": "Estimated honey output/year",
+        "Υιοθέτησε αυτή την κυψέλη — %(price).2f€": "Adopt this hive — €%(price).2f",
+        "Αυτή η κυψέλη έχει ήδη υιοθετηθεί.": "This hive has already been adopted.",
+        "kg μέλι αναμενόμενα": "kg honey expected",
+        "Δεν έχεις υιοθετήσει ακόμα κάποιο δέντρο ή κυψέλη.": "You haven't adopted a tree or hive yet.",
+        "Δες διαθέσιμες κυψέλες": "See available hives",
+        "Αυτή η κυψέλη δεν είναι πλέον διαθέσιμη.": "This hive is no longer available.",
+        "Η (δοκιμαστική) πληρωμή ολοκληρώθηκε — η κυψέλη είναι δική σου!": "The (test) payment is complete — the hive is yours!",
+        "Η πληρωμή ολοκληρώθηκε — η κυψέλη είναι δική σου!": "Payment complete — the hive is yours!",
+        "Η κυψέλη δεν βρέθηκε.": "Hive not found.",
     },
     "it": {
         # ---- nav / base ----
@@ -153,12 +173,14 @@ TRANSLATIONS = {
         "Κτήματα": "Terreni",
         "Χάρτης": "Mappa",
         "Δέντρα μου": "I miei alberi",
+        "Μελίσσια μου": "I miei alveari",
         "Πλάνο εργασιών": "Piano dei lavori",
         "Απόθεμα": "Giacenze",
         "ΟΠΕΚΕΠΕ/ΕΛΓΑ": "Report sussidi",
         "Στατιστικά": "Statistiche",
         "Συμβουλές AI": "Consigli AI",
         "Υιοθέτησε Δέντρο": "Adotta un Albero",
+        "Υιοθέτησε Κυψέλη": "Adotta un Alveare",
         "Οι Υιοθεσίες μου": "Le mie Adozioni",
         "Οι υιοθεσίες μου": "Le mie adozioni",
         "Αποσύνδεση (%(name)s)": "Esci (%(name)s)",
@@ -256,5 +278,23 @@ TRANSLATIONS = {
         "Επιβεβαίωση πληρωμής (δοκιμή)": "Confirma il pagamento (prova)",
         "🧪 Αυτή είναι δοκιμαστική πληρωμή — δεν θα χρεωθεί καμία πραγματική κάρτα. Όταν προστεθεί κλειδί Stripe, αυτή η σελίδα αντικαθίσταται αυτόματα από το πραγματικό Stripe Checkout.":
             "🧪 Questo è un pagamento di prova — nessuna carta reale verrà addebitata. Quando verrà aggiunta una chiave Stripe, questa pagina sarà sostituita automaticamente dal vero Stripe Checkout.",
+
+        # ---- hives: browse / view / adoptions ----
+        "Υιοθέτησε μια κυψέλη": "Adotta un alveare",
+        "Πλήρωσε την ετήσια συνδρομή μιας κυψέλης και πάρε στο τέλος της σεζόν το μέλι που παρήγαγε.":
+            "Paga la quota annuale di un alveare e ricevi, a fine stagione, il miele che ha prodotto.",
+        "Δεν υπάρχουν αυτή τη στιγμή διαθέσιμες κυψέλες.": "Al momento non ci sono alveari disponibili.",
+        "kg μέλι/έτος": "kg miele/anno",
+        "Δες την κυψέλη": "Guarda l'alveare",
+        "Εκτιμώμενη παραγωγή μελιού/έτος": "Produzione stimata di miele/anno",
+        "Υιοθέτησε αυτή την κυψέλη — %(price).2f€": "Adotta questo alveare — €%(price).2f",
+        "Αυτή η κυψέλη έχει ήδη υιοθετηθεί.": "Questo alveare è già stato adottato.",
+        "kg μέλι αναμενόμενα": "kg miele previsti",
+        "Δεν έχεις υιοθετήσει ακόμα κάποιο δέντρο ή κυψέλη.": "Non hai ancora adottato nessun albero o alveare.",
+        "Δες διαθέσιμες κυψέλες": "Guarda gli alveari disponibili",
+        "Αυτή η κυψέλη δεν είναι πλέον διαθέσιμη.": "Questo alveare non è più disponibile.",
+        "Η (δοκιμαστική) πληρωμή ολοκληρώθηκε — η κυψέλη είναι δική σου!": "Il pagamento (di prova) è completato — l'alveare è tuo!",
+        "Η πληρωμή ολοκληρώθηκε — η κυψέλη είναι δική σου!": "Pagamento completato — l'alveare è tuo!",
+        "Η κυψέλη δεν βρέθηκε.": "Alveare non trovato.",
     },
 }

@@ -12,6 +12,7 @@ import auth
 import fields
 import stats
 import trees
+import hives
 import advisor
 import reminders
 import planner
@@ -33,6 +34,7 @@ def create_app():
     app.register_blueprint(fields.bp)
     app.register_blueprint(stats.bp)
     app.register_blueprint(trees.bp)
+    app.register_blueprint(hives.bp)
     app.register_blueprint(advisor.bp)
     app.register_blueprint(reminders.bp)
     app.register_blueprint(planner.bp)
