@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Πλάνο εργασιών{% endblock %}
+{% block extra_head %}
+<style>
+.cal-table{width:100%; border-collapse:collapse; margin-bottom:18px;}
+.cal-table th{font-size:.78rem; color:var(--ink-soft); padding:6px; text-align:center;}
+.cal-table td{border:1px solid var(--line); vertical-align:top; padding:6px; width:14.28%; height:92px; font-size:.78rem;}
+.cal-table td.empty{background:var(--cream); opacity:.4;}
+.cal-table td.today{background:#FCF3D9;}
+.cal-day-num{font-weight:600; font-size:.82rem; margin-bottom:4px;}
+.cal-task{display:block; background:var(--olive); color:#fff; border-radius:5px; padding:2px 5px; margin-bottom:3px; font-size:.72rem; line-height:1.3;}
+.cal-task.done{background:var(--line); color:var(--ink-soft); text-decoration:line-through;}
+.cal-nav{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;}
+</style>
+{% endblock %}
+{% block content %}
+<h1>Πλάνο εργασιών</h1>
+<p>Προγραμμάτισε εργασίες μπροστά στο χρόνο — δεν περιμένεις να τις κάνεις για να τις καταγράψεις.</p>
+
+<div class="cal-nav">
+  <a class="btn ghost" href="{{ url_for('planner.calendar_view', month='%04d-%02d' % (prev_year, prev_month)) }}">‹ Προηγούμενος</a>
+  <h2 style="margin:0;">{{ month_name }} {{ year }}</h2>
+  <a class="btn ghost" href="{{ url_for('planner.calendar_view', month='%04d-%02d' % (next_year, next_month)) }}">Επόμενος ›</a>
+</div>
+
+<table class="cal-table">
+  <thead><tr>{% for wd in weekdays %}<th>{{ wd }}</th>{% endfor %}</tr></thead>
+  <tbody>
+    {% for week in weeks %}
+    <tr>
+      {% for day in week %}
+        {% if day == 0 %}
+        <td class="empty"></td>
+        {% else %}
+        <td class="{{ 'today' if (today.year == year and today.month == month and today.day == day) else '' }}">
+          <div class="cal-day-num">{{ day }}</div>
+          {% for t in by_day.get(day, []) %}
+          <span class="cal-task {{ 'done' if t['status'] == 'done' else '' }}" title="{{ t['field_name'] }}{% if t['notes'] %} — {{ t['notes'] }}{% endif %}">
+            {{ t['task_type'] }} ({{ t['field_name'] }})
+          </span>
+          {% endfor %}
+        </td>
+        {% endif %}
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="card">
+  <h2>Προγραμματισμός νέας εργασίας</h2>
+  <form method="post" action="{{ url_for('planner.new_planned_task') }}">
+    <label>Κτήμα</label>
+    <select name="field_id" required>
+      {% for f in fields %}
+      <option value="{{ f['id'] }}">{{ f['name'] }}</option>
+      {% endfor %}
+    </select>
+    <label>Τύπος εργασίας</label>
+    <select name="task_type" required>
+      {% for t in task_types %}
+      <option value="{{ t }}">{{ t }}</option>
+      {% endfor %}
+    </select>
+    <label>Ημερομηνία</label>
+    <input type="date" name="planned_date" required>
+    <label>Σημειώσεις</label>
+    <textarea name="notes"></textarea>
+    <button class="btn soil" type="submit">Προγραμματισμός</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Εργασίες αυτού του μήνα</h2>
+  {% set month_tasks = by_day.values() | sum(start=[]) %}
+  {% if month_tasks %}
+  <table>
+    <thead><tr><th>Ημερομηνία</th><th>Κτήμα</th><th>Εργασία</th><th>Σημειώσεις</th><th>Κατάσταση</th><th></th></tr></thead>
+    <tbody>
+      {% for day in by_day.keys() | sort %}
+        {% for t in by_day[day] %}
+        <tr>
+          <td>{{ t['planned_date'] }}</td>
+          <td>{{ t['field_name'] }}</td>
+          <td>{{ t['task_type'] }}</td>
+          <td>{{ t['notes'] or '—' }}</td>
+          <td>{{ 'Ολοκληρωμένη ✅' if t['status'] == 'done' else 'Εκκρεμεί' }}</td>
+          <td style="white-space:nowrap;">
+            {% if t['status'] != 'done' %}
+            <form method="post" action="{{ url_for('planner.mark_done', task_id=t['id']) }}" style="display:inline;">
+              <button class="btn ghost" type="submit" style="margin:0; padding:5px 9px; font-size:.76rem;">Ολοκληρώθηκε</button>
+            </form>
+            {% endif %}
+            <a class="btn ghost" style="margin:0; padding:5px 9px; font-size:.76rem;" href="{{ url_for('planner.download_ics', task_id=t['id']) }}">📅 Στο ημερολόγιο</a>
+            <form method="post" action="{{ url_for('planner.delete_planned', task_id=t['id']) }}" style="display:inline;" onsubmit="return confirm('Διαγραφή;');">
+              <button class="btn ghost" type="submit" style="margin:0; padding:5px 9px; font-size:.76rem;">Διαγραφή</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>Καμία προγραμματισμένη εργασία αυτό τον μήνα.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Σύνδεση με το ημερολόγιο σου (Google Calendar, κινητό, Outlook)</h2>
+  <p>Κάθε εργασία έχει το δικό της κουμπί "📅 Στο ημερολόγιο" για μεμονωμένη προσθήκη.</p>
+  <p>Αν θες όλο το πλάνο να ενημερώνεται μόνο του, πρόσθεσε αυτόν τον σύνδεσμο <strong>μία φορά</strong> στο Google Calendar (Ρυθμίσεις → Προσθήκη ημερολογίου → Μέσω URL) ή στο ημερολόγιο του κινητού σου:</p>
+  <input type="text" readonly value="{{ feed_url }}" style="width:100%; font-size:.8rem;" onclick="this.select();">
+</div>
+{% endblock %}

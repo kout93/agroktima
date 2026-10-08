@@ -13,6 +13,7 @@ import stats
 import trees
 import advisor
 import reminders
+import planner
 
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
 
@@ -31,6 +32,7 @@ def create_app():
     app.register_blueprint(trees.bp)
     app.register_blueprint(advisor.bp)
     app.register_blueprint(reminders.bp)
+    app.register_blueprint(planner.bp)
 
     @app.context_processor
     def inject_globals():

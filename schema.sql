@@ -84,6 +84,18 @@ CREATE TABLE IF NOT EXISTS harvests (
 
 CREATE INDEX IF NOT EXISTS idx_harvests_field ON harvests(field_id);
 
+CREATE TABLE IF NOT EXISTS planned_tasks (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    field_id      INTEGER NOT NULL REFERENCES fields(id) ON DELETE CASCADE,
+    task_type     TEXT NOT NULL,
+    planned_date  TEXT NOT NULL,
+    notes         TEXT,
+    status        TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'done')),
+    created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_planned_tasks_field ON planned_tasks(field_id);
+
 CREATE TABLE IF NOT EXISTS reminder_log (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     farmer_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

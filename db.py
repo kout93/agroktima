@@ -43,6 +43,7 @@ def init_db():
     _ensure_column(conn, "fields", "longitude", "REAL")
     _ensure_column(conn, "trees", "latitude", "REAL")
     _ensure_column(conn, "trees", "longitude", "REAL")
+    _ensure_column(conn, "users", "calendar_token", "TEXT")
     conn.commit()
     conn.close()
 
