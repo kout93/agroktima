@@ -1,15 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Πληρωμή (δοκιμή){% endblock %}
+{% block title %}{{ _('Δοκιμαστική πληρωμή') }}{% endblock %}
 {% block content %}
 <div class="card" style="max-width:420px; margin:0 auto;">
-  <h1>Ολοκλήρωση υιοθεσίας</h1>
-  <p>🫒 <strong>{{ tree['code'] }}</strong><br>Σεζόν {{ adoption['season_year'] }}</p>
+  <h1>{{ _('Ολοκλήρωση υιοθεσίας') }}</h1>
+  <p>🫒 <strong>{{ tree['code'] }}</strong><br>{{ _('Σεζόν') }} {{ adoption['season_year'] }}</p>
   <p style="font-size:1.4rem; color:var(--soil); font-family:var(--serif); font-weight:600;">
     {{ "%.2f"|format(adoption['amount']) }}€
   </p>
-  <p style="font-size:.82rem;">🧪 Αυτή είναι δοκιμαστική πληρωμή — δεν θα χρεωθεί καμία πραγματική κάρτα. Όταν προστεθεί κλειδί Stripe, αυτή η σελίδα αντικαθίσταται αυτόματα από το πραγματικό Stripe Checkout.</p>
+  <p style="font-size:.82rem;">{{ _('🧪 Αυτή είναι δοκιμαστική πληρωμή — δεν θα χρεωθεί καμία πραγματική κάρτα. Όταν προστεθεί κλειδί Stripe, αυτή η σελίδα αντικαθίσταται αυτόματα από το πραγματικό Stripe Checkout.') }}</p>
   <form method="post" action="{{ url_for('trees.checkout_test_confirm', adoption_id=adoption['id']) }}">
-    <button class="btn soil" type="submit">Επιβεβαίωση πληρωμής (δοκιμή)</button>
+    <button class="btn soil" type="submit">{{ _('Επιβεβαίωση πληρωμής (δοκιμή)') }}</button>
   </form>
 </div>
 {% endblock %}

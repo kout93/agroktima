@@ -7,6 +7,7 @@ from db import get_db
 from auth import role_required, current_user
 from payments import create_checkout_session, IS_LIVE
 from uploads import save_photo
+from translations import t as _
 
 bp = Blueprint("trees", __name__, url_prefix="/trees")
 
@@ -45,7 +46,7 @@ def new_tree():
     photo_filename = save_photo(request.files.get("photo"))
 
     if not code or not price:
-        flash("Χρειάζεται τουλάχιστον κωδικός δέντρου και τιμή.", "error")
+        flash(_("Χρειάζεται τουλάχιστον κωδικός δέντρου και τιμή."), "error")
         return redirect(url_for("trees.manage_trees"))
 
     db.execute(
@@ -64,7 +65,7 @@ def new_tree():
         ),
     )
     db.commit()
-    flash("Το δέντρο προστέθηκε προς υιοθεσία.", "success")
+    flash(_("Το δέντρο προστέθηκε προς υιοθεσία."), "success")
     return redirect(url_for("trees.manage_trees"))
 
 
@@ -77,13 +78,13 @@ def update_tree_location(tree_id):
         "SELECT * FROM trees WHERE id = ? AND farmer_id = ?", (tree_id, user["id"])
     ).fetchone()
     if tree is None:
-        flash("Το δέντρο δεν βρέθηκε.", "error")
+        flash(_("Το δέντρο δεν βρέθηκε."), "error")
         return redirect(url_for("trees.manage_trees"))
 
     latitude = request.form.get("latitude", "").strip()
     longitude = request.form.get("longitude", "").strip()
     if not latitude or not longitude:
-        flash("Σημείωσε ένα σημείο στον χάρτη πρώτα.", "error")
+        flash(_("Σημείωσε ένα σημείο στον χάρτη πρώτα."), "error")
         return redirect(url_for("trees.manage_trees"))
 
     db.execute(
@@ -91,7 +92,7 @@ def update_tree_location(tree_id):
         (float(latitude), float(longitude), tree_id),
     )
     db.commit()
-    flash("Η θέση του δέντρου ενημερώθηκε.", "success")
+    flash(_("Η θέση του δέντρου ενημερώθηκε."), "success")
     return redirect(url_for("trees.manage_trees"))
 
 
@@ -104,16 +105,16 @@ def update_tree_photo(tree_id):
         "SELECT * FROM trees WHERE id = ? AND farmer_id = ?", (tree_id, user["id"])
     ).fetchone()
     if tree is None:
-        flash("Το δέντρο δεν βρέθηκε.", "error")
+        flash(_("Το δέντρο δεν βρέθηκε."), "error")
         return redirect(url_for("trees.manage_trees"))
 
     photo_filename = save_photo(request.files.get("photo"))
     if photo_filename:
         db.execute("UPDATE trees SET photo_filename = ? WHERE id = ?", (photo_filename, tree_id))
         db.commit()
-        flash("Η φωτογραφία του δέντρου ενημερώθηκε.", "success")
+        flash(_("Η φωτογραφία του δέντρου ενημερώθηκε."), "success")
     else:
-        flash("Δεν ανέβηκε έγκυρη φωτογραφία.", "error")
+        flash(_("Δεν ανέβηκε έγκυρη φωτογραφία."), "error")
     return redirect(url_for("trees.manage_trees"))
 
 
@@ -126,7 +127,7 @@ def add_update(tree_id):
         "SELECT * FROM trees WHERE id = ? AND farmer_id = ?", (tree_id, user["id"])
     ).fetchone()
     if tree is None:
-        flash("Το δέντρο δεν βρέθηκε.", "error")
+        flash(_("Το δέντρο δεν βρέθηκε."), "error")
         return redirect(url_for("trees.manage_trees"))
 
     message = request.form.get("message", "").strip()
@@ -138,9 +139,9 @@ def add_update(tree_id):
             (tree_id, datetime.now().strftime("%Y-%m-%d"), message, photo_filename),
         )
         db.commit()
-        flash("Η ενημέρωση προστέθηκε.", "success")
+        flash(_("Η ενημέρωση προστέθηκε."), "success")
     else:
-        flash("Χρειάζεται τουλάχιστον κείμενο για την ενημέρωση.", "error")
+        flash(_("Χρειάζεται τουλάχιστον κείμενο για την ενημέρωση."), "error")
     return redirect(url_for("trees.manage_trees"))
 
 
@@ -178,7 +179,7 @@ def view_tree(tree_id):
         (tree_id,),
     ).fetchone()
     if tree is None:
-        flash("Το δέντρο δεν βρέθηκε.", "error")
+        flash(_("Το δέντρο δεν βρέθηκε."), "error")
         return redirect(url_for("trees.browse"))
 
     updates = db.execute(
@@ -195,7 +196,7 @@ def adopt(tree_id):
     user = current_user()
     tree = db.execute("SELECT * FROM trees WHERE id = ?", (tree_id,)).fetchone()
     if tree is None or tree["status"] != "available":
-        flash("Αυτό το δέντρο δεν είναι πλέον διαθέσιμο.", "error")
+        flash(_("Αυτό το δέντρο δεν είναι πλέον διαθέσιμο."), "error")
         return redirect(url_for("trees.browse"))
 
     year = datetime.now().year
@@ -224,7 +225,7 @@ def adopt(tree_id):
 def checkout_test(adoption_id):
     """Σελίδα προσομοίωσης πληρωμής — ενεργή μόνο όταν δεν υπάρχει πραγματικό κλειδί Stripe."""
     if IS_LIVE:
-        flash("Η δοκιμαστική πληρωμή δεν είναι διαθέσιμη (έχει ρυθμιστεί πραγματικό Stripe).", "error")
+        flash(_("Η δοκιμαστική πληρωμή δεν είναι διαθέσιμη (έχει ρυθμιστεί πραγματικό Stripe)."), "error")
         return redirect(url_for("trees.browse"))
 
     db = get_db()
@@ -233,7 +234,7 @@ def checkout_test(adoption_id):
         "SELECT * FROM adoptions WHERE id = ? AND customer_id = ?", (adoption_id, user["id"])
     ).fetchone()
     if adoption is None:
-        flash("Η υιοθεσία δεν βρέθηκε.", "error")
+        flash(_("Η υιοθεσία δεν βρέθηκε."), "error")
         return redirect(url_for("trees.browse"))
     tree = db.execute("SELECT * FROM trees WHERE id = ?", (adoption["tree_id"],)).fetchone()
     return render_template("trees/checkout_test.html", adoption=adoption, tree=tree)
@@ -248,11 +249,11 @@ def checkout_test_confirm(adoption_id):
         "SELECT * FROM adoptions WHERE id = ? AND customer_id = ?", (adoption_id, user["id"])
     ).fetchone()
     if adoption is None:
-        flash("Η υιοθεσία δεν βρέθηκε.", "error")
+        flash(_("Η υιοθεσία δεν βρέθηκε."), "error")
         return redirect(url_for("trees.browse"))
 
     _mark_adoption_paid(db, adoption)
-    flash("Η (δοκιμαστική) πληρωμή ολοκληρώθηκε — το δέντρο είναι δικό σου!", "success")
+    flash(_("Η (δοκιμαστική) πληρωμή ολοκληρώθηκε — το δέντρο είναι δικό σου!"), "success")
     return redirect(url_for("trees.my_adoptions"))
 
 
@@ -265,7 +266,7 @@ def checkout_success():
     adoption = db.execute("SELECT * FROM adoptions WHERE id = ?", (adoption_id,)).fetchone()
     if adoption and adoption["status"] != "paid":
         _mark_adoption_paid(db, adoption)
-    flash("Η πληρωμή ολοκληρώθηκε — το δέντρο είναι δικό σου!", "success")
+    flash(_("Η πληρωμή ολοκληρώθηκε — το δέντρο είναι δικό σου!"), "success")
     return redirect(url_for("trees.my_adoptions"))
 
 

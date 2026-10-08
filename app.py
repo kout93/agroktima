@@ -4,9 +4,10 @@
 """
 import os
 from datetime import date
-from flask import Flask, render_template, session
+from flask import Flask, render_template, session, redirect, request, url_for
 
 from db import register_app, get_db
+from translations import t, get_lang, SUPPORTED_LANGS
 import auth
 import fields
 import stats
@@ -38,9 +39,21 @@ def create_app():
     app.register_blueprint(stock.bp)
     app.register_blueprint(opekepe_report.bp)
 
+    app.jinja_env.globals["_"] = t
+
     @app.context_processor
     def inject_globals():
-        return {"stripe_configured": app.config["STRIPE_CONFIGURED"]}
+        return {
+            "stripe_configured": app.config["STRIPE_CONFIGURED"],
+            "current_lang": get_lang(),
+            "supported_langs": SUPPORTED_LANGS,
+        }
+
+    @app.route("/lang/<code>")
+    def set_lang(code):
+        if code in SUPPORTED_LANGS:
+            session["lang"] = code
+        return redirect(request.referrer or url_for("main.home"))
 
     @app.context_processor
     def inject_reminders_banner():

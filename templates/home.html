@@ -1,21 +1,21 @@
 {% extends "base.html" %}
-{% block title %}Αγρόκτημα{% endblock %}
+{% block title %}{{ _('Αγρόκτημα') }}{% endblock %}
 {% block hero %}
 <div class="hero">
   <img class="hero-bg" src="https://images.pexels.com/photos/38928225/pexels-photo-38928225.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="Ελαιώνας το ηλιοβασίλεμα" loading="eager">
   <div class="hero-content">
-    <h1>Το χωράφι σου, στο κινητό σου</h1>
-    <p>Καταγραφή κτημάτων, εργασιών και εξόδων για αγρότες — και ένα σύστημα όπου κάποιος μπορεί να «υιοθετήσει» ένα δέντρο ελιάς με αντάλλαγμα το λάδι του.</p>
+    <h1>{{ _('Το χωράφι σου, στο κινητό σου') }}</h1>
+    <p>{{ _('Καταγραφή κτημάτων, εργασιών και εξόδων για αγρότες — και ένα σύστημα όπου κάποιος μπορεί να «υιοθετήσει» ένα δέντρο ελιάς με αντάλλαγμα το λάδι του.') }}</p>
     <div class="hero-actions">
       {% if not current_user %}
-        <a class="btn soil" href="{{ url_for('auth.register') }}">Δημιουργία λογαριασμού</a>
-        <a class="btn ghost" href="{{ url_for('auth.login') }}">Σύνδεση</a>
+        <a class="btn soil" href="{{ url_for('auth.register') }}">{{ _('Δημιουργία λογαριασμού') }}</a>
+        <a class="btn ghost" href="{{ url_for('auth.login') }}">{{ _('Σύνδεση') }}</a>
       {% elif current_user['role'] == 'farmer' %}
-        <a class="btn soil" href="{{ url_for('fields.list_fields') }}">Τα κτήματά μου</a>
-        <a class="btn ghost" href="{{ url_for('trees.manage_trees') }}">Δέντρα προς υιοθεσία</a>
+        <a class="btn soil" href="{{ url_for('fields.list_fields') }}">{{ _('Τα κτήματά μου') }}</a>
+        <a class="btn ghost" href="{{ url_for('trees.manage_trees') }}">{{ _('Δέντρα προς υιοθεσία') }}</a>
       {% else %}
-        <a class="btn soil" href="{{ url_for('trees.browse') }}">Δες δέντρα προς υιοθεσία</a>
-        <a class="btn ghost" href="{{ url_for('trees.my_adoptions') }}">Οι υιοθεσίες μου</a>
+        <a class="btn soil" href="{{ url_for('trees.browse') }}">{{ _('Δες δέντρα προς υιοθεσία') }}</a>
+        <a class="btn ghost" href="{{ url_for('trees.my_adoptions') }}">{{ _('Οι υιοθεσίες μου') }}</a>
       {% endif %}
     </div>
   </div>
@@ -24,19 +24,18 @@
 {% block content %}
 {% if not current_user %}
 <div class="card">
-  <h2>Ξεκίνα τώρα</h2>
-  <p>Αν είσαι αγρότης, φτιάξε λογαριασμό για να καταγράφεις τα κτήματα και τις εργασίες σου.<br>
-  Αν θέλεις να υιοθετήσεις ένα δέντρο ελιάς, φτιάξε λογαριασμό πελάτη.</p>
+  <h2>{{ _('Ξεκίνα τώρα') }}</h2>
+  <p>{{ _('Αν είσαι αγρότης, φτιάξε λογαριασμό για να καταγράφεις τα κτήματα και τις εργασίες σου.<br>\n  Αν θέλεις να υιοθετήσεις ένα δέντρο ελιάς, φτιάξε λογαριασμό πελάτη.') | safe }}</p>
 </div>
 {% elif current_user['role'] == 'farmer' %}
 <div class="card">
-  <h2>Καλώς ήρθες, {{ current_user['name'] }}</h2>
-  <p>Συνέχισε από εκεί που σταμάτησες — κτήματα, εργασίες, παραγωγή, καιρός και αναφορές, όλα σε ένα μέρος.</p>
+  <h2>{{ _('Καλώς ήρθες, %(name)s', name=current_user['name']) }}</h2>
+  <p>{{ _('Συνέχισε από εκεί που σταμάτησες — κτήματα, εργασίες, παραγωγή, καιρός και αναφορές, όλα σε ένα μέρος.') }}</p>
 </div>
 {% else %}
 <div class="card">
-  <h2>Καλώς ήρθες, {{ current_user['name'] }}</h2>
-  <p>Βρες ένα δέντρο ελιάς να υιοθετήσεις και παρακολούθησε την πρόοδό του μέχρι τη συγκομιδή.</p>
+  <h2>{{ _('Καλώς ήρθες, %(name)s', name=current_user['name']) }}</h2>
+  <p>{{ _('Βρες ένα δέντρο ελιάς να υιοθετήσεις και παρακολούθησε την πρόοδό του μέχρι τη συγκομιδή.') }}</p>
 </div>
 {% endif %}
 {% endblock %}

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="el">
+<html lang="{{ current_lang }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block title %}Αγρόκτημα{% endblock %}</title>
+<title>{% block title %}{{ _('Αγρόκτημα') }}{% endblock %}</title>
 <script>
 (function(){
   try {
@@ -19,42 +19,47 @@
 </head>
 <body>
 {% if not stripe_configured %}
-<div class="test-banner">🧪 Λειτουργία δοκιμής — οι πληρωμές δεν είναι πραγματικές μέχρι να προστεθεί κλειδί Stripe</div>
+<div class="test-banner">{{ _('🧪 Λειτουργία δοκιμής — οι πληρωμές δεν είναι πραγματικές μέχρι να προστεθεί κλειδί Stripe') }}</div>
 {% endif %}
 {% if daily_reminders %}
 <div class="flash error" style="background:#FCF3D9; color:#7A5A12; display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
   <div>
-    🔔 <strong>Υπενθυμίσεις σήμερα:</strong>
+    🔔 <strong>{{ _('Υπενθυμίσεις σήμερα:') }}</strong>
     <ul style="margin:6px 0 0; padding-left:18px;">
       {% for r in daily_reminders %}<li>{{ r['message'] }}</li>{% endfor %}
     </ul>
   </div>
-  <a href="{{ url_for('reminders.dismiss') }}" style="white-space:nowrap; color:#7A5A12; text-decoration:underline;">Κλείσιμο για σήμερα</a>
+  <a href="{{ url_for('reminders.dismiss') }}" style="white-space:nowrap; color:#7A5A12; text-decoration:underline;">{{ _('Κλείσιμο για σήμερα') }}</a>
 </div>
 {% endif %}
 <nav>
-  <a class="brand" href="{{ url_for('main.home') }}">🫒 Αγρόκτημα</a>
+  <a class="brand" href="{{ url_for('main.home') }}">{{ _('🫒 Αγρόκτημα') }}</a>
   <div class="links">
     {% if current_user %}
       {% if current_user['role'] == 'farmer' %}
-        <a href="{{ url_for('fields.list_fields') }}">Κτήματα</a>
-        <a href="{{ url_for('fields.fields_map') }}">Χάρτης</a>
-        <a href="{{ url_for('trees.manage_trees') }}">Δέντρα μου</a>
-        <a href="{{ url_for('planner.calendar_view') }}">Πλάνο εργασιών</a>
-        <a href="{{ url_for('stock.overview') }}">Απόθεμα</a>
-        <a href="{{ url_for('opekepe.overview') }}">ΟΠΕΚΕΠΕ/ΕΛΓΑ</a>
-        <a href="{{ url_for('stats.overview') }}">Στατιστικά</a>
-        <a href="{{ url_for('advisor.ask') }}">Συμβουλές AI</a>
+        <a href="{{ url_for('fields.list_fields') }}">{{ _('Κτήματα') }}</a>
+        <a href="{{ url_for('fields.fields_map') }}">{{ _('Χάρτης') }}</a>
+        <a href="{{ url_for('trees.manage_trees') }}">{{ _('Δέντρα μου') }}</a>
+        <a href="{{ url_for('planner.calendar_view') }}">{{ _('Πλάνο εργασιών') }}</a>
+        <a href="{{ url_for('stock.overview') }}">{{ _('Απόθεμα') }}</a>
+        <a href="{{ url_for('opekepe.overview') }}">{{ _('ΟΠΕΚΕΠΕ/ΕΛΓΑ') }}</a>
+        <a href="{{ url_for('stats.overview') }}">{{ _('Στατιστικά') }}</a>
+        <a href="{{ url_for('advisor.ask') }}">{{ _('Συμβουλές AI') }}</a>
       {% else %}
-        <a href="{{ url_for('trees.browse') }}">Υιοθέτησε Δέντρο</a>
-        <a href="{{ url_for('trees.my_adoptions') }}">Οι Υιοθεσίες μου</a>
+        <a href="{{ url_for('trees.browse') }}">{{ _('Υιοθέτησε Δέντρο') }}</a>
+        <a href="{{ url_for('trees.my_adoptions') }}">{{ _('Οι Υιοθεσίες μου') }}</a>
       {% endif %}
-      <a href="{{ url_for('auth.logout') }}">Αποσύνδεση ({{ current_user['name'] }})</a>
+      <a href="{{ url_for('auth.logout') }}">{{ _('Αποσύνδεση (%(name)s)', name=current_user['name']) }}</a>
     {% else %}
-      <a href="{{ url_for('auth.login') }}">Σύνδεση</a>
-      <a href="{{ url_for('auth.register') }}">Εγγραφή</a>
+      <a href="{{ url_for('auth.login') }}">{{ _('Σύνδεση') }}</a>
+      <a href="{{ url_for('auth.register') }}">{{ _('Εγγραφή') }}</a>
     {% endif %}
-    <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Ξεκούραση ματιών — σκοτεινό φόντο" title="Ξεκούραση ματιών (σκοτεινό φόντο)">
+    <span class="lang-switch">
+      {% for code, label in supported_langs.items() %}
+        <a href="{{ url_for('set_lang', code=code) }}" class="{{ 'active' if code == current_lang else '' }}">{{ label }}</a>
+      {% endfor %}
+    </span>
+    <button type="button" id="theme-toggle" class="theme-toggle" aria-label="{{ _('Ξεκούραση ματιών — σκοτεινό φόντο') }}" title="{{ _('Ξεκούραση ματιών (σκοτεινό φόντο)') }}">
       <span id="theme-toggle-icon">🌙</span>
     </button>
   </div>

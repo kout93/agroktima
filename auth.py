@@ -6,6 +6,7 @@ from functools import wraps
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from db import get_db
+from translations import t as _
 
 bp = Blueprint("auth", __name__)
 
@@ -22,7 +23,7 @@ def login_required(view):
     @wraps(view)
     def wrapped(*args, **kwargs):
         if current_user() is None:
-            flash("Πρέπει πρώτα να συνδεθείς.", "error")
+            flash(_("Πρέπει πρώτα να συνδεθείς."), "error")
             return redirect(url_for("auth.login", next=request.path))
         return view(*args, **kwargs)
     return wrapped
@@ -34,10 +35,10 @@ def role_required(role):
         def wrapped(*args, **kwargs):
             user = current_user()
             if user is None:
-                flash("Πρέπει πρώτα να συνδεθείς.", "error")
+                flash(_("Πρέπει πρώτα να συνδεθείς."), "error")
                 return redirect(url_for("auth.login", next=request.path))
             if user["role"] != role:
-                flash("Δεν έχεις πρόσβαση σε αυτή τη σελίδα.", "error")
+                flash(_("Δεν έχεις πρόσβαση σε αυτή τη σελίδα."), "error")
                 return redirect(url_for("main.home"))
             return view(*args, **kwargs)
         return wrapped
@@ -54,13 +55,13 @@ def register():
 
         error = None
         if not name:
-            error = "Συμπλήρωσε το όνομά σου."
+            error = _("Συμπλήρωσε το όνομά σου.")
         elif not email or "@" not in email:
-            error = "Δώσε ένα έγκυρο email."
+            error = _("Δώσε ένα έγκυρο email.")
         elif len(password) < 6:
-            error = "Ο κωδικός χρειάζεται τουλάχιστον 6 χαρακτήρες."
+            error = _("Ο κωδικός χρειάζεται τουλάχιστον 6 χαρακτήρες.")
         elif role not in ("farmer", "customer"):
-            error = "Επίλεξε αν είσαι αγρότης ή πελάτης."
+            error = _("Επίλεξε αν είσαι αγρότης ή πελάτης.")
 
         db = get_db()
         if error is None:
@@ -68,7 +69,7 @@ def register():
                 "SELECT id FROM users WHERE email = ?", (email,)
             ).fetchone()
             if existing is not None:
-                error = "Υπάρχει ήδη λογαριασμός με αυτό το email."
+                error = _("Υπάρχει ήδη λογαριασμός με αυτό το email.")
 
         if error is None:
             db.execute(
@@ -77,9 +78,12 @@ def register():
             )
             db.commit()
             user = db.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+            lang = session.get("lang")
             session.clear()
+            if lang:
+                session["lang"] = lang
             session["user_id"] = user["id"]
-            flash("Ο λογαριασμός δημιουργήθηκε!", "success")
+            flash(_("Ο λογαριασμός δημιουργήθηκε!"), "success")
             return redirect(url_for("main.home"))
 
         flash(error, "error")
@@ -98,10 +102,13 @@ def login():
 
         error = None
         if user is None or not check_password_hash(user["password_hash"], password):
-            error = "Λάθος email ή κωδικός."
+            error = _("Λάθος email ή κωδικός.")
 
         if error is None:
+            lang = session.get("lang")
             session.clear()
+            if lang:
+                session["lang"] = lang
             session["user_id"] = user["id"]
             next_url = request.args.get("next") or url_for("main.home")
             return redirect(next_url)
@@ -113,7 +120,10 @@ def login():
 
 @bp.route("/logout")
 def logout():
+    lang = session.get("lang")
     session.clear()
+    if lang:
+        session["lang"] = lang
     return redirect(url_for("main.home"))
 
 

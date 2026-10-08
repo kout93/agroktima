@@ -27,8 +27,12 @@ nav{display:flex; justify-content:space-between; align-items:center; padding:16p
 nav .brand{font-family:var(--serif); font-weight:650; color:var(--olive-deep); font-size:1.2rem; text-decoration:none;}
 nav .links a{margin-left:16px; font-size:.92rem; color:var(--ink-soft); text-decoration:none; font-weight:500; transition:color .15s ease;}
 nav .links a:hover{color:var(--olive-deep);}
-.theme-toggle{display:flex; align-items:center; justify-content:center; width:38px; height:38px; margin-left:18px; border-radius:50%; border:1px solid var(--line); background:var(--card); font-size:1.05rem; cursor:pointer; flex-shrink:0; transition:transform .2s ease, box-shadow .2s ease, background .25s ease;}
+.theme-toggle{display:flex; align-items:center; justify-content:center; width:38px; height:38px; margin-left:10px; border-radius:50%; border:1px solid var(--line); background:var(--card); font-size:1.05rem; cursor:pointer; flex-shrink:0; transition:transform .2s ease, box-shadow .2s ease, background .25s ease;}
 .theme-toggle:hover{transform:scale(1.08); box-shadow:var(--shadow-sm);}
+.lang-switch{display:inline-flex; align-items:center; gap:2px; margin-left:16px; padding:2px; border:1px solid var(--line); border-radius:20px; background:var(--card);}
+nav .links .lang-switch a{margin-left:0; padding:4px 9px; border-radius:16px; font-size:.76rem; font-weight:700; letter-spacing:.02em; color:var(--ink-soft); text-decoration:none;}
+.lang-switch a.active{background:var(--olive-deep); color:#fff;}
+.lang-switch a:hover:not(.active){color:var(--olive-deep);}
 
 /* ---------- Hero ---------- */
 .hero{position:relative; width:100%; min-height:420px; display:flex; align-items:center; overflow:hidden; background:var(--olive-deep);}

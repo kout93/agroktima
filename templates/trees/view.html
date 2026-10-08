@@ -8,7 +8,7 @@
 </div>
 <h1>🫒 {{ tree['code'] }}</h1>
 <p>
-  Παραγωγός: {{ tree['farmer_name'] }}
+  {{ _('Παραγωγός:') }} {{ tree['farmer_name'] }}
   {% if tree['field_location'] %} · {{ tree['field_location'] }}{% endif %}
   {% if tree['field_name'] %} · {{ tree['field_name'] }}{% endif %}
 </p>
@@ -17,49 +17,49 @@
   {% if tree['est_oil_kg_min'] %}
   <div class="stat">
     <div class="stat-num">{{ tree['est_oil_kg_min'] }}–{{ tree['est_oil_kg_max'] }} kg</div>
-    <div class="stat-label">Εκτιμώμενη παραγωγή λαδιού/έτος</div>
+    <div class="stat-label">{{ _('Εκτιμώμενη παραγωγή λαδιού/έτος') }}</div>
   </div>
   {% endif %}
   <div class="stat">
     <div class="stat-num">{{ "%.2f"|format(tree['price_per_year']) }}€</div>
-    <div class="stat-label">Τιμή υιοθεσίας/έτος</div>
+    <div class="stat-label">{{ _('Τιμή υιοθεσίας/έτος') }}</div>
   </div>
 </div>
 
 {% if tree['status'] == 'available' %}
   {% if current_user and current_user['role'] == 'customer' %}
   <form method="post" action="{{ url_for('trees.adopt', tree_id=tree['id']) }}">
-    <button class="btn soil" type="submit">Υιοθέτησε αυτό το δέντρο — {{ "%.2f"|format(tree['price_per_year']) }}€</button>
+    <button class="btn soil" type="submit">{{ _('Υιοθέτησε αυτό το δέντρο — %(price).2f€', price=tree['price_per_year']) }}</button>
   </form>
   {% elif current_user %}
-  <p><em>Η υιοθεσία είναι διαθέσιμη μόνο για λογαριασμούς πελάτη.</em></p>
+  <p><em>{{ _('Η υιοθεσία είναι διαθέσιμη μόνο για λογαριασμούς πελάτη.') }}</em></p>
   {% else %}
-  <a class="btn soil" href="{{ url_for('auth.login', next=request.path) }}">Σύνδεση για υιοθεσία</a>
+  <a class="btn soil" href="{{ url_for('auth.login', next=request.path) }}">{{ _('Σύνδεση για υιοθεσία') }}</a>
   {% endif %}
 {% else %}
-  <p><span class="badge adopted">Υιοθετημένο</span> Αυτό το δέντρο έχει ήδη υιοθετηθεί.</p>
+  <p><span class="badge adopted">{{ _('Υιοθετημένο') }}</span> {{ _('Αυτό το δέντρο έχει ήδη υιοθετηθεί.') }}</p>
 {% endif %}
 
 {% if tree['display_latitude'] and tree['display_longitude'] %}
 <div class="card">
-  <h2>Πού βρίσκεται</h2>
+  <h2>{{ _('Πού βρίσκεται') }}</h2>
   {{ maps.static_map('tree-location-map', tree['display_latitude'], tree['display_longitude'], tree['code']) }}
 </div>
 {% endif %}
 
 <div class="card">
-  <h2>Ενημερώσεις προόδου</h2>
+  <h2>{{ _('Ενημερώσεις προόδου') }}</h2>
   {% if updates %}
     {% for u in updates %}
     <div style="margin-bottom:16px;">
       <p style="margin-bottom:6px;"><strong>{{ u['update_date'] }}</strong> — {{ u['message'] }}</p>
       {% if u['photo_filename'] %}
-      <img src="{{ url_for('static', filename='uploads/' + u['photo_filename']) }}" alt="Φωτογραφία ενημέρωσης" style="max-width:100%; border-radius:10px; border:1px solid var(--line);">
+      <img src="{{ url_for('static', filename='uploads/' + u['photo_filename']) }}" alt="{{ _('Φωτογραφία ενημέρωσης') }}" style="max-width:100%; border-radius:10px; border:1px solid var(--line);">
       {% endif %}
     </div>
     {% endfor %}
   {% else %}
-    <p>Δεν υπάρχουν ακόμα ενημερώσεις.</p>
+    <p>{{ _('Δεν υπάρχουν ακόμα ενημερώσεις.') }}</p>
   {% endif %}
 </div>
 {% endblock %}

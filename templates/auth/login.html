@@ -1,15 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Σύνδεση — Αγρόκτημα{% endblock %}
+{% block title %}{{ _('Σύνδεση') }} — {{ _('Αγρόκτημα') }}{% endblock %}
 {% block content %}
 <div class="card" style="max-width:420px; margin:0 auto;">
-  <h1>Σύνδεση</h1>
+  <h1>{{ _('Σύνδεση λογαριασμού') }}</h1>
   <form method="post">
-    <label>Email</label>
+    <label>{{ _('Email') }}</label>
     <input type="email" name="email" required>
-    <label>Κωδικός</label>
+    <label>{{ _('Κωδικός') }}</label>
     <input type="password" name="password" required>
-    <button class="btn" type="submit">Σύνδεση</button>
+    <button class="btn" type="submit">{{ _('Σύνδεση') }}</button>
   </form>
-  <p style="margin-top:16px;">Δεν έχεις λογαριασμό; <a href="{{ url_for('auth.register') }}">Εγγραφή</a></p>
+  <p style="margin-top:16px;">{{ _('Δεν έχεις λογαριασμό;') }} <a href="{{ url_for('auth.register') }}">{{ _('Εγγραφή') }}</a></p>
 </div>
 {% endblock %}

@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Υιοθέτησε Δέντρο{% endblock %}
+{% block title %}{{ _('Υιοθέτησε Δέντρο') }}{% endblock %}
 {% block extra_head %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>#trees-overview-map{ height:320px; border-radius:12px; border:1px solid var(--line); margin-bottom:22px; }</style>
 {% endblock %}
 {% block content %}
-<h1>Υιοθέτησε ένα δέντρο ελιάς</h1>
-<p>Πλήρωσε την ετήσια συνδρομή ενός δέντρου και πάρε στο τέλος της σεζόν το λάδι που παρήγαγε.</p>
+<h1>{{ _('Υιοθέτησε ένα δέντρο ελιάς') }}</h1>
+<p>{{ _('Πλήρωσε την ετήσια συνδρομή ενός δέντρου και πάρε στο τέλος της σεζόν το λάδι που παρήγαγε.') }}</p>
 
 {% set mapped_trees = trees|selectattr('display_latitude')|list %}
 {% if mapped_trees %}
@@ -17,7 +17,7 @@
 <div class="tree-grid">
   {% for t in trees %}
   <a class="tree-card" href="{{ url_for('trees.view_tree', tree_id=t['id']) }}" style="text-decoration:none; color:inherit;">
-    <span class="badge available">Διαθέσιμο</span>
+    <span class="badge available">{{ _('Διαθέσιμο') }}</span>
     <div class="tree-photo-wrap">
       <img src="{{ url_for('static', filename='uploads/' + t['photo_filename']) if t['photo_filename'] else 'https://images.pexels.com/photos/6184912/pexels-photo-6184912.jpeg?auto=compress&cs=tinysrgb&w=800' }}" alt="{{ t['code'] }}" loading="lazy">
     </div>
@@ -25,16 +25,16 @@
       <h3>🫒 {{ t['code'] }}</h3>
       <p class="tree-meta">
         {{ t['farmer_name'] }}{% if t['field_location'] %} · {{ t['field_location'] }}{% endif %}
-        {% if t['est_oil_kg_min'] %}<br>{{ t['est_oil_kg_min'] }}–{{ t['est_oil_kg_max'] }} kg λάδι/έτος{% endif %}
-        {% if t['display_latitude'] %} · 📍 με σημείο στον χάρτη{% endif %}
+        {% if t['est_oil_kg_min'] %}<br>{{ t['est_oil_kg_min'] }}–{{ t['est_oil_kg_max'] }} {{ _('kg λάδι/έτος') }}{% endif %}
+        {% if t['display_latitude'] %} · 📍 {{ _('με σημείο στον χάρτη') }}{% endif %}
       </p>
-      <div class="tree-price">{{ "%.2f"|format(t['price_per_year']) }}€ / έτος</div>
+      <div class="tree-price">{{ "%.2f"|format(t['price_per_year']) }}{{ _('€ / έτος') }}</div>
     </div>
   </a>
   {% endfor %}
 </div>
 {% else %}
-  <p>Δεν υπάρχουν αυτή τη στιγμή διαθέσιμα δέντρα.</p>
+  <p>{{ _('Δεν υπάρχουν αυτή τη στιγμή διαθέσιμα δέντρα.') }}</p>
 {% endif %}
 {% endblock %}
 {% block extra_scripts %}
@@ -59,7 +59,7 @@
   var group = [];
   points.forEach(function(p){
     var m = L.marker([p.lat, p.lng]).addTo(map);
-    m.bindPopup('<strong>' + p.code + '</strong><br><a href="' + p.url + '">Δες το δέντρο</a>');
+    m.bindPopup('<strong>' + p.code + '</strong><br><a href="' + p.url + '">{{ _('Δες το δέντρο') }}</a>');
     group.push(m);
   });
   if (group.length === 1) { map.setView([points[0].lat, points[0].lng], 16); }
