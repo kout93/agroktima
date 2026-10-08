@@ -14,19 +14,27 @@
 </p>
 
 <div class="card">
-  <h2>Τοποθεσία</h2>
-  {% if field['latitude'] and field['longitude'] %}
-  <div id="field-map"></div>
-  <p style="font-size:.82rem; margin-top:8px;">Σύρε τον δείκτη για να διορθώσεις τη θέση.</p>
-  {% else %}
-  <div id="field-map"></div>
-  <p style="font-size:.82rem; margin-top:8px;">Δεν έχει σημειωθεί ακόμα θέση — κάνε κλικ στον χάρτη για να την προσθέσεις.</p>
-  {% endif %}
-  <form method="post" action="{{ url_for('fields.update_location', field_id=field['id']) }}" id="location-form">
-    <input type="hidden" name="latitude" id="latitude">
-    <input type="hidden" name="longitude" id="longitude">
-    <button class="btn ghost" type="submit" id="save-location-btn" style="display:none;">Αποθήκευση θέσης</button>
+  <h2>Περίγραμμα κτήματος & εμβαδόν</h2>
+  <p style="font-size:.86rem;">Κάνε κλικ στον δορυφορικό χάρτη για να σημαδέψεις τις γωνίες του κτήματος, μία-μία γύρω-γύρω (τουλάχιστον 3 σημεία) — ή φόρτωσε συντεταγμένες από το τοπογραφικό σου παρακάτω. Το εμβαδόν σε στρέμματα υπολογίζεται αυτόματα.</p>
+  <div id="field-map" style="height:340px; border-radius:10px; border:1px solid var(--line);"></div>
+  <p id="boundary-area" style="font-size:.86rem; font-weight:600; margin-top:8px;"></p>
+  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+    <button type="button" class="btn ghost" id="undo-point-btn" style="margin:0;">↩️ Αφαίρεση τελευταίου σημείου</button>
+    <button type="button" class="btn ghost" id="clear-points-btn" style="margin:0;">🗑️ Καθαρισμός όλων</button>
+    <button type="button" class="btn ghost" id="geo-point-btn" style="margin:0;">📍 Προσθήκη τρέχουσας θέσης μου</button>
+  </div>
+
+  <form method="post" action="{{ url_for('fields.update_boundary', field_id=field['id']) }}" id="boundary-form" style="margin-top:10px;">
+    <input type="hidden" name="points_json" id="points_json">
+    <button class="btn soil" type="submit" id="save-boundary-btn" style="display:none;">Αποθήκευση περιγράμματος</button>
   </form>
+
+  <details style="margin-top:14px;">
+    <summary style="cursor:pointer; font-size:.86rem; color:var(--ink-soft);">Έχεις συντεταγμένες από τοπογραφικό; Πρόσθεσέ τις εδώ.</summary>
+    <p style="font-size:.8rem; margin-top:8px;">Μία γραμμή ανά σημείο, μορφή: <code>γεωγραφικό πλάτος, γεωγραφικό μήκος</code> (π.χ. <code>37.0389, 22.1142</code>). Χρειάζονται συντεταγμένες GPS (WGS84) — αν το τοπογραφικό σου έχει ΕΓΣΑ'87, πες μου και το προσθέτουμε.</p>
+    <textarea id="points-textarea" rows="4" placeholder="37.0389, 22.1142&#10;37.0392, 22.1150&#10;37.0385, 22.1155"></textarea>
+    <button type="button" class="btn ghost" id="load-points-btn" style="margin-top:6px;">Φόρτωση σημείων στον χάρτη</button>
+  </details>
 </div>
 
 <div class="card">
@@ -169,46 +177,22 @@
 {% endblock %}
 {% block extra_scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="{{ url_for('static', filename='js/field-polygon.js') }}"></script>
 <script>
 (function(){
-  var hasCoords = {{ 'true' if (field['latitude'] and field['longitude']) else 'false' }};
-  var startLat = hasCoords ? {{ field['latitude'] or 38.2 }} : 38.2;
-  var startLng = hasCoords ? {{ field['longitude'] or 23.8 }} : 23.8;
-  var zoom = hasCoords ? 14 : 6;
-
-  var map = L.map('field-map').setView([startLat, startLng], zoom);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap συνεισφέροντες'
-  }).addTo(map);
-
-  var latInput = document.getElementById('latitude');
-  var lngInput = document.getElementById('longitude');
-  var saveBtn = document.getElementById('save-location-btn');
-  var marker = hasCoords ? L.marker([startLat, startLng], {draggable:true}).addTo(map) : null;
-
-  function markMoved(lat, lng){
-    latInput.value = lat;
-    lngInput.value = lng;
-    saveBtn.style.display = 'inline-block';
-  }
-
-  if (marker) {
-    marker.on('dragend', function(){
-      var p = marker.getLatLng();
-      markMoved(p.lat, p.lng);
-    });
-  }
-
-  map.on('click', function(e){
-    if (marker) { marker.setLatLng(e.latlng); }
-    else { marker = L.marker(e.latlng, {draggable:true}).addTo(map);
-      marker.on('dragend', function(){
-        var p = marker.getLatLng();
-        markMoved(p.lat, p.lng);
-      });
-    }
-    markMoved(e.latlng.lat, e.latlng.lng);
+  initFieldPolygon({
+    mapDivId: 'field-map',
+    pointsInputId: 'points_json',
+    areaDisplayId: 'boundary-area',
+    saveBtnId: 'save-boundary-btn',
+    undoBtnId: 'undo-point-btn',
+    clearBtnId: 'clear-points-btn',
+    geoBtnId: 'geo-point-btn',
+    loadTextBtnId: 'load-points-btn',
+    textareaId: 'points-textarea',
+    initialPoints: {{ boundary_points|tojson }},
+    centerLat: {{ field['latitude'] or 38.2 }},
+    centerLng: {{ field['longitude'] or 23.8 }}
   });
 })();
 </script>

@@ -1,11 +1,13 @@
 """
 Διαχείριση κτημάτων και καταγραφή εργασιών.
 """
+import json
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from db import get_db
 from auth import role_required, current_user
 from uploads import save_photo
 from weather import fetch_forecast
+from geo import polygon_area_stremma, polygon_centroid
 
 bp = Blueprint("fields", __name__, url_prefix="/fields")
 
@@ -110,6 +112,13 @@ def view_field(field_id):
     if field["latitude"] and field["longitude"]:
         forecast = fetch_forecast(field["latitude"], field["longitude"])
 
+    if field["boundary_points"]:
+        boundary_points = json.loads(field["boundary_points"])
+    elif field["latitude"] and field["longitude"]:
+        boundary_points = [[field["latitude"], field["longitude"]]]
+    else:
+        boundary_points = []
+
     return render_template(
         "fields/view.html",
         field=field,
@@ -121,6 +130,7 @@ def view_field(field_id):
         product_types=PRODUCT_TYPES,
         cost_per_kg=cost_per_kg,
         forecast=forecast,
+        boundary_points=boundary_points,
     )
 
 
@@ -148,6 +158,41 @@ def update_location(field_id):
     )
     db.commit()
     flash("Η τοποθεσία του κτήματος ενημερώθηκε.", "success")
+    return redirect(url_for("fields.view_field", field_id=field_id))
+
+
+@bp.route("/<int:field_id>/boundary", methods=["POST"])
+@role_required("farmer")
+def update_boundary(field_id):
+    db = get_db()
+    user = current_user()
+    field = db.execute(
+        "SELECT * FROM fields WHERE id = ? AND farmer_id = ?", (field_id, user["id"])
+    ).fetchone()
+    if field is None:
+        flash("Το κτήμα δεν βρέθηκε.", "error")
+        return redirect(url_for("fields.list_fields"))
+
+    try:
+        points = json.loads(request.form.get("points_json", "[]"))
+        points = [[float(p[0]), float(p[1])] for p in points]
+    except (ValueError, TypeError, IndexError):
+        points = []
+
+    if len(points) < 3:
+        flash("Σημείωσε τουλάχιστον 3 σημεία στον χάρτη (ή φόρτωσέ τα από το τοπογραφικό) για να υπολογιστεί το εμβαδόν.", "error")
+        return redirect(url_for("fields.view_field", field_id=field_id))
+
+    area = polygon_area_stremma(points)
+    centroid_lat, centroid_lng = polygon_centroid(points)
+
+    db.execute(
+        """UPDATE fields SET boundary_points = ?, area_stremma = ?, latitude = ?, longitude = ?
+           WHERE id = ?""",
+        (json.dumps(points), round(area, 3), centroid_lat, centroid_lng, field_id),
+    )
+    db.commit()
+    flash(f"Το περίγραμμα αποθηκεύτηκε — υπολογισμένο εμβαδόν: {area:.2f} στρέμματα.", "success")
     return redirect(url_for("fields.view_field", field_id=field_id))
 
 

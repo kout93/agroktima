@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS fields (
     tree_count  INTEGER DEFAULT 0,
     latitude    REAL,
     longitude   REAL,
+    boundary_points TEXT,
     created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
