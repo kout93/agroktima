@@ -45,6 +45,7 @@ def init_db():
     _ensure_column(conn, "trees", "longitude", "REAL")
     _ensure_column(conn, "users", "calendar_token", "TEXT")
     _ensure_column(conn, "fields", "boundary_points", "TEXT")
+    _ensure_column(conn, "trees", "photo_filename", "TEXT")
     conn.commit()
     conn.close()
 

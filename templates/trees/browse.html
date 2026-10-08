@@ -2,7 +2,7 @@
 {% block title %}Υιοθέτησε Δέντρο{% endblock %}
 {% block extra_head %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<style>#trees-overview-map{ height:320px; border-radius:10px; border:1px solid var(--line); margin-bottom:22px; }</style>
+<style>#trees-overview-map{ height:320px; border-radius:12px; border:1px solid var(--line); margin-bottom:22px; }</style>
 {% endblock %}
 {% block content %}
 <h1>Υιοθέτησε ένα δέντρο ελιάς</h1>
@@ -14,20 +14,25 @@
 {% endif %}
 
 {% if trees %}
+<div class="tree-grid">
   {% for t in trees %}
-  <div class="tree-card">
-    <div>
-      <div style="font-weight:600;">🫒 {{ t['code'] }}</div>
-      <div style="color:var(--ink-soft); font-size:.85rem;">
-        {{ t['farmer_name'] }}{% if t['field_location'] %} · {{ t['field_location'] }}{% endif %}
-        {% if t['est_oil_kg_min'] %} · {{ t['est_oil_kg_min'] }}–{{ t['est_oil_kg_max'] }} kg λάδι/έτος{% endif %}
-        · {{ "%.2f"|format(t['price_per_year']) }}€/έτος
-        {% if t['display_latitude'] %} · 📍 με σημείο στον χάρτη{% endif %}
-      </div>
+  <a class="tree-card" href="{{ url_for('trees.view_tree', tree_id=t['id']) }}" style="text-decoration:none; color:inherit;">
+    <span class="badge available">Διαθέσιμο</span>
+    <div class="tree-photo-wrap">
+      <img src="{{ url_for('static', filename='uploads/' + t['photo_filename']) if t['photo_filename'] else 'https://images.pexels.com/photos/6184912/pexels-photo-6184912.jpeg?auto=compress&cs=tinysrgb&w=800' }}" alt="{{ t['code'] }}" loading="lazy">
     </div>
-    <a class="btn soil" href="{{ url_for('trees.view_tree', tree_id=t['id']) }}">Δες περισσότερα</a>
-  </div>
+    <div class="tree-body">
+      <h3>🫒 {{ t['code'] }}</h3>
+      <p class="tree-meta">
+        {{ t['farmer_name'] }}{% if t['field_location'] %} · {{ t['field_location'] }}{% endif %}
+        {% if t['est_oil_kg_min'] %}<br>{{ t['est_oil_kg_min'] }}–{{ t['est_oil_kg_max'] }} kg λάδι/έτος{% endif %}
+        {% if t['display_latitude'] %} · 📍 με σημείο στον χάρτη{% endif %}
+      </p>
+      <div class="tree-price">{{ "%.2f"|format(t['price_per_year']) }}€ / έτος</div>
+    </div>
+  </a>
   {% endfor %}
+</div>
 {% else %}
   <p>Δεν υπάρχουν αυτή τη στιγμή διαθέσιμα δέντρα.</p>
 {% endif %}
@@ -42,10 +47,14 @@
     {lat: {{ t['display_latitude'] }}, lng: {{ t['display_longitude'] }}, code: {{ t['code']|tojson }}, url: {{ url_for('trees.view_tree', tree_id=t['id'])|tojson }}},
     {% endfor %}
   ];
-  var map = L.map('trees-overview-map');
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19, attribution: '&copy; OpenStreetMap συνεισφέροντες'
-  }).addTo(map);
+  var streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 21, maxNativeZoom: 19, attribution: '&copy; OpenStreetMap συνεισφέροντες'
+  });
+  var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 22, maxNativeZoom: 19, attribution: 'Πλακίδια &copy; Esri — Source: Esri, Maxar, Earthstar Geographics'
+  });
+  var map = L.map('trees-overview-map', {layers: [satellite], maxZoom: 22});
+  L.control.layers({"Δορυφορικός": satellite, "Δρόμοι (OpenStreetMap)": streets}).addTo(map);
 
   var group = [];
   points.forEach(function(p){
@@ -53,7 +62,7 @@
     m.bindPopup('<strong>' + p.code + '</strong><br><a href="' + p.url + '">Δες το δέντρο</a>');
     group.push(m);
   });
-  if (group.length === 1) { map.setView([points[0].lat, points[0].lng], 13); }
+  if (group.length === 1) { map.setView([points[0].lat, points[0].lng], 15); }
   else { map.fitBounds(L.featureGroup(group).getBounds().pad(0.2)); }
 })();
 </script>

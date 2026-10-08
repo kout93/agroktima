@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS trees (
     price_per_year   REAL NOT NULL,
     status           TEXT NOT NULL DEFAULT 'available' CHECK (status IN ('available', 'adopted')),
     photo_notes      TEXT,
+    photo_filename   TEXT,
     latitude         REAL,
     longitude        REAL,
     created_at       TEXT NOT NULL DEFAULT (datetime('now'))

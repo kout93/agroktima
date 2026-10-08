@@ -3,6 +3,9 @@
 {% block title %}{{ tree['code'] }}{% endblock %}
 {% block extra_head %}{{ maps.leaflet_head() }}{% endblock %}
 {% block content %}
+<div class="tree-photo-wrap" style="border-radius:14px; margin-bottom:18px; box-shadow:var(--shadow-md); max-height:340px;">
+  <img src="{{ url_for('static', filename='uploads/' + tree['photo_filename']) if tree['photo_filename'] else 'https://images.pexels.com/photos/6184912/pexels-photo-6184912.jpeg?auto=compress&cs=tinysrgb&w=1200' }}" alt="{{ tree['code'] }}" style="max-height:340px;">
+</div>
 <h1>🫒 {{ tree['code'] }}</h1>
 <p>
   Παραγωγός: {{ tree['farmer_name'] }}

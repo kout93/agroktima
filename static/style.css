@@ -3,27 +3,45 @@
   --olive-deep:#3E4A2C; --olive:#6F7D4B; --soil:#A6532B; --gold:#C89B3C;
   --line:rgba(35,38,30,.16); --card:#FFFFFF;
   --serif:'Fraunces',Georgia,serif; --sans:'Inter',system-ui,sans-serif;
+  --shadow-sm:0 1px 3px rgba(35,38,30,.06), 0 1px 2px rgba(35,38,30,.08);
+  --shadow-md:0 6px 18px rgba(35,38,30,.09), 0 2px 6px rgba(35,38,30,.06);
+  --shadow-lg:0 18px 44px rgba(35,38,30,.16), 0 4px 10px rgba(35,38,30,.08);
 }
 *{box-sizing:border-box;}
 body{margin:0; background:var(--cream); color:var(--ink); font-family:var(--sans); line-height:1.55;}
-.wrap{max-width:860px; margin:0 auto; padding:32px 20px 80px;}
+.wrap{max-width:1040px; margin:0 auto; padding:32px 20px 80px;}
 a{color:var(--soil);}
 h1,h2,h3{font-family:var(--serif); color:var(--olive-deep); font-weight:650; margin:0 0 10px;}
 h1{font-size:2rem;} h2{font-size:1.4rem;} h3{font-size:1.1rem;}
 p{color:var(--ink-soft); margin:0 0 12px;}
-nav{display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--line); max-width:860px; margin:0 auto;}
+nav{display:flex; justify-content:space-between; align-items:center; padding:16px 24px; border-bottom:1px solid var(--line); max-width:1040px; margin:0 auto; background:var(--cream); position:relative; z-index:5;}
 nav .brand{font-family:var(--serif); font-weight:650; color:var(--olive-deep); font-size:1.2rem; text-decoration:none;}
-nav .links a{margin-left:16px; font-size:.92rem; color:var(--ink-soft); text-decoration:none; font-weight:500;}
+nav .links a{margin-left:16px; font-size:.92rem; color:var(--ink-soft); text-decoration:none; font-weight:500; transition:color .15s ease;}
 nav .links a:hover{color:var(--olive-deep);}
-.card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:22px; margin-bottom:18px;}
+
+/* ---------- Hero ---------- */
+.hero{position:relative; width:100%; min-height:420px; display:flex; align-items:center; overflow:hidden; background:var(--olive-deep);}
+.hero img.hero-bg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;}
+.hero::after{content:''; position:absolute; inset:0; background:linear-gradient(115deg, rgba(23,27,16,.82) 0%, rgba(23,27,16,.55) 45%, rgba(23,27,16,.18) 100%); z-index:1;}
+.hero-content{position:relative; z-index:2; max-width:1040px; margin:0 auto; padding:64px 24px; color:#fff;}
+.hero-content h1{color:#fff; font-size:2.6rem; max-width:18ch; margin-bottom:14px;}
+.hero-content p{color:rgba(255,255,255,.88); max-width:46ch; font-size:1.05rem; margin-bottom:26px;}
+.hero-actions{display:flex; gap:12px; flex-wrap:wrap;}
+.hero .btn{margin-top:0;}
+.hero .btn.ghost{background:rgba(255,255,255,.08); color:#fff; border-color:rgba(255,255,255,.55); backdrop-filter:blur(2px);}
+@media (max-width:640px){ .hero-content h1{font-size:1.9rem;} .hero{min-height:360px;} }
+
+.card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:22px; margin-bottom:18px; box-shadow:var(--shadow-sm); transition:box-shadow .2s ease, transform .2s ease;}
 .flash{padding:12px 16px; border-radius:8px; margin-bottom:16px; font-size:.92rem;}
 .flash.error{background:#FBE7E0; color:#8A3A1E;}
 .flash.success{background:#E8EEDD; color:var(--olive-deep);}
 label{display:block; font-size:.85rem; color:var(--ink-soft); margin:14px 0 5px;}
 label:first-child{margin-top:0;}
-input,select,textarea{width:100%; font-family:var(--sans); font-size:.95rem; padding:9px 10px; border:1px solid var(--line); border-radius:8px; background:var(--cream); color:var(--ink);}
+input,select,textarea{width:100%; font-family:var(--sans); font-size:.95rem; padding:9px 10px; border:1px solid var(--line); border-radius:8px; background:var(--cream); color:var(--ink); transition:border-color .15s ease;}
+input:focus,select:focus,textarea:focus{outline:none; border-color:var(--olive);}
 textarea{resize:vertical; min-height:70px;}
-.btn{display:inline-block; margin-top:16px; font-family:var(--sans); font-weight:600; font-size:.92rem; color:#fff; background:var(--olive-deep); border:none; border-radius:8px; padding:11px 18px; cursor:pointer; text-decoration:none;}
+.btn{display:inline-block; margin-top:16px; font-family:var(--sans); font-weight:600; font-size:.92rem; color:#fff; background:var(--olive-deep); border:none; border-radius:8px; padding:11px 18px; cursor:pointer; text-decoration:none; transition:transform .15s ease, box-shadow .15s ease, background .15s ease;}
+.btn:hover{transform:translateY(-1px); box-shadow:var(--shadow-sm);}
 .btn.soil{background:var(--soil);}
 .btn.ghost{background:transparent; color:var(--olive-deep); border:1px solid var(--line);}
 table{width:100%; border-collapse:collapse; font-size:.9rem;}
@@ -33,7 +51,23 @@ td{padding:8px; border-bottom:1px solid var(--line);}
 .stat{flex:1; min-width:140px; background:var(--cream); border:1px solid var(--line); border-radius:10px; padding:14px;}
 .stat-num{font-family:var(--serif); font-size:1.5rem; color:var(--soil); font-weight:600;}
 .stat-label{font-size:.78rem; color:var(--ink-soft);}
-.tree-card{display:flex; justify-content:space-between; align-items:center; gap:14px; border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:10px;}
+
+/* ---------- Image-led tree/product cards ---------- */
+.tree-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:18px; margin-bottom:10px;}
+.tree-card{position:relative; display:block; border:1px solid var(--line); border-radius:14px; overflow:hidden; background:var(--card); box-shadow:var(--shadow-sm); transition:box-shadow .2s ease, transform .2s ease;}
+.tree-card:hover{box-shadow:var(--shadow-lg); transform:translateY(-3px);}
+.tree-photo-wrap{position:relative; width:100%; aspect-ratio:4/3; overflow:hidden; background:var(--olive-deep);}
+.tree-photo-wrap img{width:100%; height:100%; object-fit:cover; display:block;}
+.tree-card .tree-body{padding:16px;}
+.tree-card .tree-body h3{margin-bottom:6px;}
+.tree-card .tree-meta{font-size:.85rem; color:var(--ink-soft); margin:0 0 12px;}
+.tree-card .badge{position:absolute; top:10px; right:10px; z-index:2;}
+.tree-card .tree-price{font-family:var(--serif); font-weight:650; color:var(--soil); font-size:1.15rem;}
+
+/* Flat, non-grid variant used on farmer "manage" screens with side-by-side controls */
+.tree-card.flat{display:flex; justify-content:space-between; align-items:center; gap:14px; padding:14px;}
+.tree-card.flat .tree-thumb{width:64px; height:64px; border-radius:10px; object-fit:cover; flex-shrink:0; box-shadow:var(--shadow-sm);}
+
 .badge{display:inline-block; font-size:.72rem; font-weight:600; padding:3px 9px; border-radius:20px;}
 .badge.available{background:#E8EEDD; color:var(--olive-deep);}
 .badge.adopted{background:#F1E3D0; color:var(--soil);}

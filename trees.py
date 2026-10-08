@@ -42,14 +42,15 @@ def new_tree():
     price = request.form.get("price_per_year", "").strip()
     latitude = request.form.get("latitude", "").strip()
     longitude = request.form.get("longitude", "").strip()
+    photo_filename = save_photo(request.files.get("photo"))
 
     if not code or not price:
         flash("Χρειάζεται τουλάχιστον κωδικός δέντρου και τιμή.", "error")
         return redirect(url_for("trees.manage_trees"))
 
     db.execute(
-        """INSERT INTO trees (farmer_id, field_id, code, est_oil_kg_min, est_oil_kg_max, price_per_year, latitude, longitude)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+        """INSERT INTO trees (farmer_id, field_id, code, est_oil_kg_min, est_oil_kg_max, price_per_year, latitude, longitude, photo_filename)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
             user["id"],
             int(field_id) if field_id else None,
@@ -59,6 +60,7 @@ def new_tree():
             float(price),
             float(latitude) if latitude else None,
             float(longitude) if longitude else None,
+            photo_filename,
         ),
     )
     db.commit()
@@ -90,6 +92,28 @@ def update_tree_location(tree_id):
     )
     db.commit()
     flash("Η θέση του δέντρου ενημερώθηκε.", "success")
+    return redirect(url_for("trees.manage_trees"))
+
+
+@bp.route("/manage/<int:tree_id>/photo", methods=["POST"])
+@role_required("farmer")
+def update_tree_photo(tree_id):
+    db = get_db()
+    user = current_user()
+    tree = db.execute(
+        "SELECT * FROM trees WHERE id = ? AND farmer_id = ?", (tree_id, user["id"])
+    ).fetchone()
+    if tree is None:
+        flash("Το δέντρο δεν βρέθηκε.", "error")
+        return redirect(url_for("trees.manage_trees"))
+
+    photo_filename = save_photo(request.files.get("photo"))
+    if photo_filename:
+        db.execute("UPDATE trees SET photo_filename = ? WHERE id = ?", (photo_filename, tree_id))
+        db.commit()
+        flash("Η φωτογραφία του δέντρου ενημερώθηκε.", "success")
+    else:
+        flash("Δεν ανέβηκε έγκυρη φωτογραφία.", "error")
     return redirect(url_for("trees.manage_trees"))
 
 
@@ -260,7 +284,7 @@ def my_adoptions():
     db = get_db()
     user = current_user()
     rows = db.execute(
-        """SELECT a.*, tr.id AS tree_id, tr.code, tr.est_oil_kg_min, tr.est_oil_kg_max,
+        """SELECT a.*, tr.id AS tree_id, tr.code, tr.est_oil_kg_min, tr.est_oil_kg_max, tr.photo_filename,
                   COALESCE(tr.latitude, f.latitude) AS display_latitude,
                   COALESCE(tr.longitude, f.longitude) AS display_longitude,
                   f.name AS field_name, u.name AS farmer_name
