@@ -12,7 +12,15 @@ from geo import polygon_area_stremma, polygon_centroid
 bp = Blueprint("fields", __name__, url_prefix="/fields")
 
 TASK_TYPES = ["Όργωμα", "Πότισμα", "Λίπανση", "Ψεκασμός", "Κλάδεμα", "Συγκομιδή", "Άλλο"]
-PRODUCT_TYPES = ["Ελιές", "Ελαιόλαδο", "Άλλο"]
+
+# Ενδεικτικές προτάσεις για το είδος παραγωγής — ο αγρότης μπορεί να
+# γράψει οποιοδήποτε δικό του είδος, δεν περιορίζεται σε αυτή τη λίστα
+# (καλλιέργεια ελιάς, σιτηρών, λαχανικών, κτηνοτροφίας, ό,τι παράγει).
+PRODUCT_TYPES = [
+    "Ελιές", "Ελαιόλαδο", "Σιτάρι", "Κριθάρι", "Καλαμπόκι", "Ρύζι",
+    "Σταφύλια", "Πορτοκάλια", "Λεμόνια", "Μήλα", "Ροδάκινα", "Ντομάτες",
+    "Πατάτες", "Βαμβάκι", "Καπνός", "Γάλα", "Μέλι", "Άλλο",
+]
 
 
 @bp.route("/")
@@ -245,7 +253,7 @@ def new_harvest(field_id):
     quantity_kg = request.form.get("quantity_kg", "").strip()
     notes = request.form.get("notes", "").strip()
 
-    if not harvest_date or product not in PRODUCT_TYPES or not quantity_kg:
+    if not harvest_date or not product or not quantity_kg:
         flash("Συμπλήρωσε ημερομηνία, είδος παραγωγής και ποσότητα.", "error")
         return redirect(url_for("fields.view_field", field_id=field_id))
 

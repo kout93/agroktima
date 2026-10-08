@@ -10,7 +10,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from db import get_db
 from auth import role_required, current_user
-from fields import PRODUCT_TYPES
 
 bp = Blueprint("stock", __name__, url_prefix="/stock")
 
@@ -57,7 +56,7 @@ def overview():
         "stock/overview.html",
         stock_rows=stock_rows,
         outflow_history=outflow_history,
-        product_types=PRODUCT_TYPES,
+        product_options=[r["product"] for r in stock_rows],
         reasons=OUTFLOW_REASONS,
     )
 
@@ -74,7 +73,7 @@ def new_outflow():
     reason = request.form.get("reason", "").strip()
     notes = request.form.get("notes", "").strip()
 
-    if product not in PRODUCT_TYPES or not quantity_kg or not outflow_date or reason not in OUTFLOW_REASONS:
+    if not product or not quantity_kg or not outflow_date or reason not in OUTFLOW_REASONS:
         flash("Συμπλήρωσε είδος, ποσότητα, ημερομηνία και αιτία.", "error")
         return redirect(url_for("stock.overview"))
 
@@ -89,6 +88,9 @@ def new_outflow():
         return redirect(url_for("stock.overview"))
 
     current = {r["product"]: r["available"] for r in _stock_levels(db, user["id"])}
+    if product not in current:
+        flash(f"Δεν έχεις καταχωρημένη συγκομιδή «{product}» — πρόσθεσέ την πρώτα από τη σελίδα του κτήματος.", "error")
+        return redirect(url_for("stock.overview"))
     available = current.get(product, 0)
     if qty > available:
         flash(f"Δεν έχεις τόσο απόθεμα «{product}» — διαθέσιμο αυτή τη στιγμή: {available:.1f} κιλά.", "error")

@@ -36,10 +36,11 @@
 <div class="card">
   <h2>Καταχώρηση διάθεσης</h2>
   <p style="font-size:.86rem;">π.χ. πούλησες λάδι, έδωσες σε πελάτη, ή χάθηκε κάτι — αφαιρείται αυτόματα από το διαθέσιμο απόθεμα.</p>
+  {% if product_options %}
   <form method="post" action="{{ url_for('stock.new_outflow') }}">
     <label>Είδος</label>
     <select name="product" required>
-      {% for p in product_types %}
+      {% for p in product_options %}
       <option value="{{ p }}">{{ p }}</option>
       {% endfor %}
     </select>
@@ -57,6 +58,9 @@
     <textarea name="notes"></textarea>
     <button class="btn soil" type="submit">Καταχώρηση</button>
   </form>
+  {% else %}
+  <p>Πρόσθεσε πρώτα μια συγκομιδή από τη σελίδα ενός κτήματος — τότε θα μπορείς να καταχωρήσεις διάθεση για αυτό το είδος.</p>
+  {% endif %}
 </div>
 
 <div class="card">

@@ -96,12 +96,13 @@
   <form method="post" action="{{ url_for('fields.new_harvest', field_id=field['id']) }}">
     <label>Ημερομηνία συγκομιδής</label>
     <input type="date" name="harvest_date" required>
-    <label>Είδος</label>
-    <select name="product" required>
+    <label>Είδος (γράψε ό,τι παράγεις — δεν περιορίζεσαι στις προτάσεις)</label>
+    <input type="text" name="product" list="product-suggestions" placeholder="π.χ. Ελιές, Σιτάρι, Σταφύλια, Γάλα..." required>
+    <datalist id="product-suggestions">
       {% for p in product_types %}
-      <option value="{{ p }}">{{ p }}</option>
+      <option value="{{ p }}">
       {% endfor %}
-    </select>
+    </datalist>
     <label>Ποσότητα (κιλά)</label>
     <input type="number" step="0.01" name="quantity_kg" placeholder="π.χ. 350" required>
     <label>Σημειώσεις</label>
