@@ -3,14 +3,16 @@
 Τρέξιμο: python app.py
 """
 import os
-from flask import Flask, render_template
+from datetime import date
+from flask import Flask, render_template, session
 
-from db import register_app
+from db import register_app, get_db
 import auth
 import fields
 import stats
 import trees
 import advisor
+import reminders
 
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
 
@@ -28,10 +30,21 @@ def create_app():
     app.register_blueprint(stats.bp)
     app.register_blueprint(trees.bp)
     app.register_blueprint(advisor.bp)
+    app.register_blueprint(reminders.bp)
 
     @app.context_processor
     def inject_globals():
         return {"stripe_configured": app.config["STRIPE_CONFIGURED"]}
+
+    @app.context_processor
+    def inject_reminders_banner():
+        user = auth.current_user()
+        items = []
+        if user and user["role"] == "farmer":
+            today_str = date.today().isoformat()
+            if session.get("reminders_dismissed_date") != today_str:
+                items = reminders.get_reminders(get_db(), user["id"])
+        return {"daily_reminders": items}
 
     from flask import Blueprint
     main = Blueprint("main", __name__)

@@ -29,6 +29,30 @@
   </form>
 </div>
 
+<div class="card">
+  <h2>Καιρός</h2>
+  {% if field['latitude'] and field['longitude'] %}
+    {% if forecast %}
+    <div style="display:flex; gap:16px; flex-wrap:wrap;">
+      {% for d in forecast %}
+      <div style="text-align:center; min-width:72px;">
+        <div style="font-size:1.7rem; line-height:1;">{{ d['icon'] }}</div>
+        <div style="font-size:.76rem; color:var(--ink-soft); margin-top:4px;">{{ d['date'][5:] }}</div>
+        <div style="font-size:.86rem; font-weight:600;">{{ d['temp_max']|round|int }}° / {{ d['temp_min']|round|int }}°</div>
+        {% if d['rain_chance'] is not none %}
+        <div style="font-size:.76rem; color:var(--ink-soft);">☔ {{ d['rain_chance']|round|int }}%</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p>Ο καιρός δεν είναι διαθέσιμος αυτή τη στιγμή — δοκίμασε ξανά σε λίγο.</p>
+    {% endif %}
+  {% else %}
+  <p>Σημείωσε πρώτα τη θέση του κτήματος παραπάνω για να δεις πρόγνωση καιρού.</p>
+  {% endif %}
+</div>
+
 <div class="stat-row">
   <div class="stat">
     <div class="stat-num">{{ "%.2f"|format(total_cost) }}€</div>
@@ -38,6 +62,12 @@
     <div class="stat-num">{{ tasks|length }}</div>
     <div class="stat-label">Καταχωρημένες εργασίες</div>
   </div>
+  {% if cost_per_kg %}
+  <div class="stat">
+    <div class="stat-num">{{ "%.2f"|format(cost_per_kg) }}€</div>
+    <div class="stat-label">Κόστος ανά κιλό παραγωγής</div>
+  </div>
+  {% endif %}
 </div>
 
 <div class="card">

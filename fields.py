@@ -5,6 +5,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from db import get_db
 from auth import role_required, current_user
 from uploads import save_photo
+from weather import fetch_forecast
 
 bp = Blueprint("fields", __name__, url_prefix="/fields")
 
@@ -102,6 +103,13 @@ def view_field(field_id):
         (field_id,),
     ).fetchall()
 
+    total_kg_all = sum(h["quantity_kg"] or 0 for h in harvests)
+    cost_per_kg = (total_cost / total_kg_all) if total_kg_all else None
+
+    forecast = None
+    if field["latitude"] and field["longitude"]:
+        forecast = fetch_forecast(field["latitude"], field["longitude"])
+
     return render_template(
         "fields/view.html",
         field=field,
@@ -111,6 +119,8 @@ def view_field(field_id):
         harvests=harvests,
         production_totals=production_totals,
         product_types=PRODUCT_TYPES,
+        cost_per_kg=cost_per_kg,
+        forecast=forecast,
     )
 
 

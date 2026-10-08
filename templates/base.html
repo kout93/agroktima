@@ -13,6 +13,17 @@
 {% if not stripe_configured %}
 <div class="test-banner">🧪 Λειτουργία δοκιμής — οι πληρωμές δεν είναι πραγματικές μέχρι να προστεθεί κλειδί Stripe</div>
 {% endif %}
+{% if daily_reminders %}
+<div class="flash error" style="background:#FCF3D9; color:#7A5A12; display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+  <div>
+    🔔 <strong>Υπενθυμίσεις σήμερα:</strong>
+    <ul style="margin:6px 0 0; padding-left:18px;">
+      {% for r in daily_reminders %}<li>{{ r['message'] }}</li>{% endfor %}
+    </ul>
+  </div>
+  <a href="{{ url_for('reminders.dismiss') }}" style="white-space:nowrap; color:#7A5A12; text-decoration:underline;">Κλείσιμο για σήμερα</a>
+</div>
+{% endif %}
 <nav>
   <a class="brand" href="{{ url_for('main.home') }}">🫒 Αγρόκτημα</a>
   <div class="links">

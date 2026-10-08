@@ -84,6 +84,14 @@ CREATE TABLE IF NOT EXISTS harvests (
 
 CREATE INDEX IF NOT EXISTS idx_harvests_field ON harvests(field_id);
 
+CREATE TABLE IF NOT EXISTS reminder_log (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    farmer_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    sent_date   TEXT NOT NULL,
+    created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(farmer_id, sent_date)
+);
+
 CREATE TABLE IF NOT EXISTS advisor_messages (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     farmer_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
