@@ -5,17 +5,17 @@ function initFieldPolygon(opts) {
   var initialPoints = opts.initialPoints || [];
   var centerLat = opts.centerLat || 38.2;
   var centerLng = opts.centerLng || 23.8;
-  var zoom = initialPoints.length ? 15 : 6;
+  var zoom = initialPoints.length ? 18 : 6;
 
   var streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19, attribution: '&copy; OpenStreetMap συνεισφέροντες'
+    maxZoom: 21, maxNativeZoom: 19, attribution: '&copy; OpenStreetMap συνεισφέροντες'
   });
   var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    maxZoom: 19, attribution: 'Πλακίδια &copy; Esri — Source: Esri, Maxar, Earthstar Geographics'
+    maxZoom: 22, maxNativeZoom: 19, attribution: 'Πλακίδια &copy; Esri — Source: Esri, Maxar, Earthstar Geographics'
   });
 
   var startCenter = initialPoints.length ? initialPoints[0] : [centerLat, centerLng];
-  var map = L.map(opts.mapDivId, { layers: [satellite] }).setView(startCenter, zoom);
+  var map = L.map(opts.mapDivId, { layers: [satellite], maxZoom: 22 }).setView(startCenter, zoom);
   L.control.layers({ "Δορυφορικός": satellite, "Δρόμοι (OpenStreetMap)": streets }).addTo(map);
 
   var points = initialPoints.slice();

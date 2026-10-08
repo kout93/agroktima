@@ -17,12 +17,12 @@
 (function(){
   function init(){
     var streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19, attribution: '&copy; OpenStreetMap συνεισφέροντες'
+      maxZoom: 21, maxNativeZoom: 19, attribution: '&copy; OpenStreetMap συνεισφέροντες'
     });
     var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 19, attribution: 'Πλακίδια &copy; Esri — Source: Esri, Maxar, Earthstar Geographics'
+      maxZoom: 22, maxNativeZoom: 19, attribution: 'Πλακίδια &copy; Esri — Source: Esri, Maxar, Earthstar Geographics'
     });
-    var m = L.map('{{ map_id }}', {layers: [satellite]}).setView([{{ lat }}, {{ lng }}], 14);
+    var m = L.map('{{ map_id }}', {layers: [satellite], maxZoom: 22}).setView([{{ lat }}, {{ lng }}], 17);
     L.control.layers({"Δορυφορικός": satellite, "Δρόμοι (OpenStreetMap)": streets}).addTo(m);
     var marker = L.marker([{{ lat }}, {{ lng }}]).addTo(m);
     {% if popup_text %}
