@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}Αγρόκτημα{% endblock %}</title>
+<script>
+(function(){
+  try {
+    var saved = localStorage.getItem('agroktima-theme');
+    if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+  } catch (e) {}
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -46,6 +54,9 @@
       <a href="{{ url_for('auth.login') }}">Σύνδεση</a>
       <a href="{{ url_for('auth.register') }}">Εγγραφή</a>
     {% endif %}
+    <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Ξεκούραση ματιών — σκοτεινό φόντο" title="Ξεκούραση ματιών (σκοτεινό φόντο)">
+      <span id="theme-toggle-icon">🌙</span>
+    </button>
   </div>
 </nav>
 {% block hero %}{% endblock %}
@@ -58,5 +69,6 @@
   {% block content %}{% endblock %}
 </div>
 {% block extra_scripts %}{% endblock %}
+<script src="{{ url_for('static', filename='js/theme.js') }}"></script>
 </body>
 </html>
