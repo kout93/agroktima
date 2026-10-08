@@ -9,6 +9,7 @@ from uploads import save_photo
 bp = Blueprint("fields", __name__, url_prefix="/fields")
 
 TASK_TYPES = ["Όργωμα", "Πότισμα", "Λίπανση", "Ψεκασμός", "Κλάδεμα", "Συγκομιδή", "Άλλο"]
+PRODUCT_TYPES = ["Ελιές", "Ελαιόλαδο", "Άλλο"]
 
 
 @bp.route("/")
@@ -92,8 +93,24 @@ def view_field(field_id):
     ).fetchall()
     total_cost = sum(t["cost"] or 0 for t in tasks)
 
+    harvests = db.execute(
+        "SELECT * FROM harvests WHERE field_id = ? ORDER BY harvest_date DESC, id DESC", (field_id,)
+    ).fetchall()
+    production_totals = db.execute(
+        """SELECT product, SUM(quantity_kg) AS total_kg
+           FROM harvests WHERE field_id = ? GROUP BY product ORDER BY total_kg DESC""",
+        (field_id,),
+    ).fetchall()
+
     return render_template(
-        "fields/view.html", field=field, tasks=tasks, total_cost=total_cost, task_types=TASK_TYPES
+        "fields/view.html",
+        field=field,
+        tasks=tasks,
+        total_cost=total_cost,
+        task_types=TASK_TYPES,
+        harvests=harvests,
+        production_totals=production_totals,
+        product_types=PRODUCT_TYPES,
     )
 
 
@@ -153,4 +170,41 @@ def new_task(field_id):
     )
     db.commit()
     flash("Η εργασία καταχωρήθηκε.", "success")
+    return redirect(url_for("fields.view_field", field_id=field_id))
+
+
+@bp.route("/<int:field_id>/harvests/new", methods=["POST"])
+@role_required("farmer")
+def new_harvest(field_id):
+    db = get_db()
+    user = current_user()
+    field = db.execute(
+        "SELECT * FROM fields WHERE id = ? AND farmer_id = ?", (field_id, user["id"])
+    ).fetchone()
+    if field is None:
+        flash("Το κτήμα δεν βρέθηκε.", "error")
+        return redirect(url_for("fields.list_fields"))
+
+    harvest_date = request.form.get("harvest_date", "").strip()
+    product = request.form.get("product", "").strip()
+    quantity_kg = request.form.get("quantity_kg", "").strip()
+    notes = request.form.get("notes", "").strip()
+
+    if not harvest_date or product not in PRODUCT_TYPES or not quantity_kg:
+        flash("Συμπλήρωσε ημερομηνία, είδος παραγωγής και ποσότητα.", "error")
+        return redirect(url_for("fields.view_field", field_id=field_id))
+
+    try:
+        quantity_val = float(quantity_kg)
+    except ValueError:
+        flash("Η ποσότητα πρέπει να είναι αριθμός.", "error")
+        return redirect(url_for("fields.view_field", field_id=field_id))
+
+    db.execute(
+        """INSERT INTO harvests (field_id, harvest_date, product, quantity_kg, notes)
+           VALUES (?, ?, ?, ?, ?)""",
+        (field_id, harvest_date, product, quantity_val, notes or None),
+    )
+    db.commit()
+    flash("Η παραγωγή καταχωρήθηκε.", "success")
     return redirect(url_for("fields.view_field", field_id=field_id))

@@ -67,11 +67,21 @@ def build_context_summary(db, farmer_id):
             f"{t['task_type']}: τελευταία φορά {t['last_date']}" for t in last_tasks
         ) or "καμία καταχωρημένη εργασία ακόμα"
 
+        harvest_rows = db.execute(
+            """SELECT product, SUM(quantity_kg) AS total_kg, MAX(harvest_date) AS last_date
+               FROM harvests WHERE field_id = ? GROUP BY product""",
+            (f["id"],),
+        ).fetchall()
+        harvest_summary = ", ".join(
+            f"{h['product']}: σύνολο {h['total_kg']:.1f} κιλά (τελευταία συγκομιδή {h['last_date']})"
+            for h in harvest_rows
+        ) or "καμία καταχωρημένη παραγωγή ακόμα"
+
         lines.append(
             f"- Κτήμα «{f['name']}»"
             + (f" ({f['crop']})" if f["crop"] else "")
             + (f", {f['area_stremma']} στρέμματα" if f["area_stremma"] else "")
-            + f". Εργασίες: {task_summary}."
+            + f". Εργασίες: {task_summary}. Παραγωγή: {harvest_summary}."
         )
         field_task_info.append({"field": f, "last_tasks": {t["task_type"]: t["last_date"] for t in last_tasks}})
 

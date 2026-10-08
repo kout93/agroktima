@@ -43,6 +43,16 @@ def overview():
         (user["id"],),
     ).fetchone()
 
+    production_totals = db.execute(
+        """SELECT h.product, SUM(h.quantity_kg) AS total_kg
+           FROM harvests h
+           JOIN fields f ON f.id = h.field_id
+           WHERE f.farmer_id = ?
+           GROUP BY h.product
+           ORDER BY total_kg DESC""",
+        (user["id"],),
+    ).fetchall()
+
     return render_template(
         "stats/overview.html",
         field_costs=field_costs,
@@ -50,4 +60,5 @@ def overview():
         max_cost=max_cost,
         adoption_income=adoption_income,
         tree_counts=tree_counts,
+        production_totals=production_totals,
     )

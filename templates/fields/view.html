@@ -41,6 +41,54 @@
 </div>
 
 <div class="card">
+  <h2>Παραγωγή</h2>
+  {% if production_totals %}
+  <div class="stat-row">
+    {% for p in production_totals %}
+    <div class="stat">
+      <div class="stat-num">{{ "%.1f"|format(p['total_kg']) }} κιλά</div>
+      <div class="stat-label">{{ p['product'] }} (σύνολο)</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p>Δεν έχει καταχωρηθεί ακόμα παραγωγή για αυτό το κτήμα.</p>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('fields.new_harvest', field_id=field['id']) }}">
+    <label>Ημερομηνία συγκομιδής</label>
+    <input type="date" name="harvest_date" required>
+    <label>Είδος</label>
+    <select name="product" required>
+      {% for p in product_types %}
+      <option value="{{ p }}">{{ p }}</option>
+      {% endfor %}
+    </select>
+    <label>Ποσότητα (κιλά)</label>
+    <input type="number" step="0.01" name="quantity_kg" placeholder="π.χ. 350" required>
+    <label>Σημειώσεις</label>
+    <textarea name="notes"></textarea>
+    <button class="btn soil" type="submit">Καταχώρηση παραγωγής</button>
+  </form>
+
+  {% if harvests %}
+  <table style="margin-top:16px;">
+    <thead><tr><th>Ημερομηνία</th><th>Είδος</th><th>Ποσότητα</th><th>Σημειώσεις</th></tr></thead>
+    <tbody>
+      {% for h in harvests %}
+      <tr>
+        <td>{{ h['harvest_date'] }}</td>
+        <td>{{ h['product'] }}</td>
+        <td>{{ "%.2f"|format(h['quantity_kg']) }} κιλά</td>
+        <td>{{ h['notes'] or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+
+<div class="card">
   <h2>Καταχώρηση εργασίας</h2>
   <form method="post" action="{{ url_for('fields.new_task', field_id=field['id']) }}" enctype="multipart/form-data">
     <label>Τύπος εργασίας</label>

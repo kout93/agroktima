@@ -72,6 +72,18 @@ CREATE TABLE IF NOT EXISTS production_updates (
     created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS harvests (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    field_id      INTEGER NOT NULL REFERENCES fields(id) ON DELETE CASCADE,
+    harvest_date  TEXT NOT NULL,
+    product       TEXT NOT NULL,
+    quantity_kg   REAL NOT NULL,
+    notes         TEXT,
+    created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_harvests_field ON harvests(field_id);
+
 CREATE TABLE IF NOT EXISTS advisor_messages (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     farmer_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

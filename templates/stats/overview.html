@@ -19,6 +19,22 @@
 </div>
 
 <div class="card">
+  <h2>Συνολική παραγωγή</h2>
+  {% if production_totals %}
+  <div class="stat-row">
+    {% for p in production_totals %}
+    <div class="stat">
+      <div class="stat-num">{{ "%.1f"|format(p['total_kg']) }} κιλά</div>
+      <div class="stat-label">{{ p['product'] }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p>Δεν έχει καταχωρηθεί ακόμα παραγωγή σε κανένα κτήμα.</p>
+  {% endif %}
+</div>
+
+<div class="card">
   <h2>Έξοδα ανά κτήμα</h2>
   {% if field_costs %}
     {% for f in field_costs %}
