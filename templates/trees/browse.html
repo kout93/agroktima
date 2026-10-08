@@ -48,12 +48,12 @@
     {% endfor %}
   ];
   var streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 21, maxNativeZoom: 19, attribution: '&copy; OpenStreetMap συνεισφέροντες'
+    maxZoom: 23, maxNativeZoom: 19, attribution: '&copy; OpenStreetMap συνεισφέροντες'
   });
   var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    maxZoom: 22, maxNativeZoom: 19, attribution: 'Πλακίδια &copy; Esri — Source: Esri, Maxar, Earthstar Geographics'
+    maxZoom: 24, maxNativeZoom: 19, attribution: 'Πλακίδια &copy; Esri — Source: Esri, Maxar, Earthstar Geographics'
   });
-  var map = L.map('trees-overview-map', {layers: [satellite], maxZoom: 22});
+  var map = L.map('trees-overview-map', {layers: [satellite], maxZoom: 24});
   L.control.layers({"Δορυφορικός": satellite, "Δρόμοι (OpenStreetMap)": streets}).addTo(map);
 
   var group = [];
@@ -62,7 +62,7 @@
     m.bindPopup('<strong>' + p.code + '</strong><br><a href="' + p.url + '">Δες το δέντρο</a>');
     group.push(m);
   });
-  if (group.length === 1) { map.setView([points[0].lat, points[0].lng], 15); }
+  if (group.length === 1) { map.setView([points[0].lat, points[0].lng], 16); }
   else { map.fitBounds(L.featureGroup(group).getBounds().pad(0.2)); }
 })();
 </script>
