@@ -96,6 +96,19 @@ CREATE TABLE IF NOT EXISTS planned_tasks (
 
 CREATE INDEX IF NOT EXISTS idx_planned_tasks_field ON planned_tasks(field_id);
 
+CREATE TABLE IF NOT EXISTS stock_outflows (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    farmer_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    product       TEXT NOT NULL,
+    quantity_kg   REAL NOT NULL,
+    outflow_date  TEXT NOT NULL,
+    reason        TEXT NOT NULL,
+    notes         TEXT,
+    created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_stock_outflows_farmer ON stock_outflows(farmer_id);
+
 CREATE TABLE IF NOT EXISTS reminder_log (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     farmer_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

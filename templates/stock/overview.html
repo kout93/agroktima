@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Απόθεμα παραγωγής{% endblock %}
+{% block content %}
+<h1>Απόθεμα παραγωγής</h1>
+<p>Πόσο από την παραγωγή σου (σε όλα τα κτήματα) έχεις ακόμα αδιάθετο.</p>
+
+{% if stock_rows %}
+<div class="stat-row">
+  {% for r in stock_rows %}
+  <div class="stat">
+    <div class="stat-num">{{ "%.1f"|format(r['available']) }} κιλά</div>
+    <div class="stat-label">{{ r['product'] }} — διαθέσιμο τώρα</div>
+  </div>
+  {% endfor %}
+</div>
+<div class="card">
+  <h2>Ανάλυση ανά είδος</h2>
+  <table>
+    <thead><tr><th>Είδος</th><th>Συνολική συγκομιδή</th><th>Έχει διατεθεί</th><th>Διαθέσιμο τώρα</th></tr></thead>
+    <tbody>
+      {% for r in stock_rows %}
+      <tr>
+        <td>{{ r['product'] }}</td>
+        <td>{{ "%.2f"|format(r['harvested']) }} κιλά</td>
+        <td>{{ "%.2f"|format(r['out']) }} κιλά</td>
+        <td><strong>{{ "%.2f"|format(r['available']) }} κιλά</strong></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p>Δεν έχει καταχωρηθεί ακόμα παραγωγή σε κανένα κτήμα — πρόσθεσε πρώτα συγκομιδή από τη σελίδα κάθε κτήματος.</p>
+{% endif %}
+
+<div class="card">
+  <h2>Καταχώρηση διάθεσης</h2>
+  <p style="font-size:.86rem;">π.χ. πούλησες λάδι, έδωσες σε πελάτη, ή χάθηκε κάτι — αφαιρείται αυτόματα από το διαθέσιμο απόθεμα.</p>
+  <form method="post" action="{{ url_for('stock.new_outflow') }}">
+    <label>Είδος</label>
+    <select name="product" required>
+      {% for p in product_types %}
+      <option value="{{ p }}">{{ p }}</option>
+      {% endfor %}
+    </select>
+    <label>Ποσότητα (κιλά)</label>
+    <input type="number" step="0.01" name="quantity_kg" placeholder="π.χ. 20" required>
+    <label>Ημερομηνία</label>
+    <input type="date" name="outflow_date" required>
+    <label>Αιτία</label>
+    <select name="reason" required>
+      {% for r in reasons %}
+      <option value="{{ r }}">{{ r }}</option>
+      {% endfor %}
+    </select>
+    <label>Σημειώσεις</label>
+    <textarea name="notes"></textarea>
+    <button class="btn soil" type="submit">Καταχώρηση</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Ιστορικό διαθέσεων</h2>
+  {% if outflow_history %}
+  <table>
+    <thead><tr><th>Ημερομηνία</th><th>Είδος</th><th>Ποσότητα</th><th>Αιτία</th><th>Σημειώσεις</th><th></th></tr></thead>
+    <tbody>
+      {% for o in outflow_history %}
+      <tr>
+        <td>{{ o['outflow_date'] }}</td>
+        <td>{{ o['product'] }}</td>
+        <td>{{ "%.2f"|format(o['quantity_kg']) }} κιλά</td>
+        <td>{{ o['reason'] }}</td>
+        <td>{{ o['notes'] or '—' }}</td>
+        <td>
+          <form method="post" action="{{ url_for('stock.delete_outflow', outflow_id=o['id']) }}" onsubmit="return confirm('Διαγραφή;');">
+            <button class="btn ghost" type="submit" style="margin:0; padding:5px 9px; font-size:.76rem;">Διαγραφή</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>Δεν έχει καταχωρηθεί ακόμα καμία διάθεση.</p>
+  {% endif %}
+</div>
+{% endblock %}
