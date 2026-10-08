@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Αναφορά ΟΠΕΚΕΠΕ/ΕΛΓΑ{% endblock %}
+{% block content %}
+<h1>Αναφορά ΟΠΕΚΕΠΕ / ΕΛΓΑ</h1>
+<p>
+  Συγκεντρωτικός πίνακας των κτημάτων σου, έτοιμος για αντιγραφή ή επισύναψη
+  όταν συμπληρώνεις μόνος/η σου την Ενιαία Αίτηση Ενίσχυσης (ΟΣΔΕ) στο
+  <strong>opekepe.gr</strong> ή την Ενιαία Δήλωση Καλλιέργειας (ΔΚΕ) στο
+  <strong>gov.gr</strong>.
+</p>
+<div class="flash error" style="background:#FCF3D9; color:#7A5A12;">
+  ℹ️ Οι επίσημες δηλώσεις υποβάλλονται μόνο από εσένα, με τον προσωπικό σου
+  κωδικό TAXISnet. Η εφαρμογή δεν υποβάλλει τίποτα αυτόματα και δεν θα σου
+  ζητήσει ποτέ κωδικούς TAXISnet — απλά σου ετοιμάζει τα νούμερα.
+</div>
+
+{% if rows %}
+<div class="stat-row">
+  <div class="stat">
+    <div class="stat-num">{{ rows|length }}</div>
+    <div class="stat-label">Κτήματα</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">{{ total_area }}</div>
+    <div class="stat-label">Σύνολο στρεμμάτων</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">{{ total_trees }}</div>
+    <div class="stat-label">Σύνολο δέντρων</div>
+  </div>
+</div>
+
+<div class="card">
+  <a class="btn" href="{{ url_for('opekepe.export_xlsx') }}">⬇️ Λήψη Excel (.xlsx)</a>
+  <a class="btn ghost" href="{{ url_for('opekepe.export_pdf') }}">⬇️ Λήψη PDF</a>
+
+  <table style="margin-top:18px;">
+    <thead><tr>{% for c in columns %}<th>{{ c }}</th>{% endfor %}</tr></thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>{% for v in r %}<td>{{ v }}</td>{% endfor %}</tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p>Δεν έχεις προσθέσει ακόμα κανένα κτήμα — πρόσθεσε πρώτα τα κτήματά σου για να φτιαχτεί η αναφορά.</p>
+{% endif %}
+{% endblock %}

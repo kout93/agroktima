@@ -15,6 +15,7 @@ import advisor
 import reminders
 import planner
 import stock
+import opekepe_report
 
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
 
@@ -35,6 +36,7 @@ def create_app():
     app.register_blueprint(reminders.bp)
     app.register_blueprint(planner.bp)
     app.register_blueprint(stock.bp)
+    app.register_blueprint(opekepe_report.bp)
 
     @app.context_processor
     def inject_globals():
