@@ -144,3 +144,34 @@ input[type=file]{padding:8px; font-size:.88rem; color:var(--ink-soft);}
 input[type=file]::file-selector-button{font-family:var(--sans); font-weight:600; font-size:.82rem; margin-right:12px; padding:7px 14px; border:1px solid var(--line); border-radius:4px; background:var(--card); color:var(--olive-deep); cursor:pointer; transition:border-color .15s ease;}
 input[type=file]::file-selector-button:hover{border-color:var(--olive-deep);}
 .wrap > p + .tree-grid, .wrap > p + div[id$="overview-map"]{margin-top:28px;}
+
+/* ---------- Προσβασιμότητα ---------- */
+.skip-link{position:absolute; left:12px; top:-60px; z-index:100; padding:10px 16px; background:var(--olive-deep); color:var(--cream); border-radius:4px; font-weight:600; text-decoration:none; transition:top .15s ease;}
+html[data-theme="dark"] .skip-link{color:#0D1410;}
+.skip-link:focus{top:12px;}
+main:focus{outline:none;}
+input,select,textarea{border-color:rgba(22,32,26,.42);}
+html[data-theme="dark"] input,html[data-theme="dark"] select,html[data-theme="dark"] textarea{border-color:rgba(232,235,226,.42);}
+::placeholder{color:#5F6A62; opacity:1;}
+html[data-theme="dark"] ::placeholder{color:#93A095;}
+nav .links a[aria-current="page"]{color:var(--olive-deep); font-weight:700; background-size:calc(100% - 20px) 1.5px;}
+
+/* Μενού «Περισσότερα» */
+details.more{position:relative;}
+details.more summary{list-style:none; cursor:pointer; padding:6px 10px; font-size:.88rem; font-weight:500; color:var(--ink-soft); border-radius:4px;}
+details.more summary::-webkit-details-marker{display:none;}
+details.more summary::after{content:' ▾'; font-size:.75em;}
+details.more[open] summary,details.more.has-current summary,details.more summary:hover{color:var(--olive-deep);}
+details.more .more-panel{position:absolute; right:0; top:calc(100% + 6px); min-width:200px; display:flex; flex-direction:column; padding:6px; background:var(--card); border:1px solid var(--line); border-radius:6px; box-shadow:var(--shadow-lg); z-index:30;}
+nav .links details.more .more-panel a{padding:10px 12px; background-image:none; white-space:nowrap;}
+nav .links details.more .more-panel a:hover{background:var(--cream);}
+@media (max-width:760px){ details.more .more-panel{left:0; right:auto;} }
+
+/* Μεγαλύτεροι στόχοι αφής σε κινητά/tablet */
+@media (pointer:coarse){
+  nav .links a,details.more summary{min-height:44px; display:inline-flex; align-items:center;}
+  .theme-toggle{width:44px; height:44px;}
+  nav .links .lang-switch a{min-height:36px; min-width:36px; justify-content:center; padding:0 10px;}
+  .btn{min-height:44px;}
+  input,select,textarea{min-height:44px;}
+}

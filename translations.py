@@ -180,6 +180,12 @@ TRANSLATIONS = {
         "Υιοθέτησε μια κυψέλη": "Adopt a hive",
         "Παρακολούθησε την κυψέλη σου μέσα στη σεζόν και πάρε το μέλι της.": "Follow your hive through the season and receive its honey.",
         "Άνοιγμα": "Open",
+
+        # ---- a11y / nav ----
+        "Μετάβαση στο περιεχόμενο": "Skip to content",
+        "Κύριο μενού": "Main menu",
+        "Γλώσσα": "Language",
+        "Περισσότερα": "More",
     },
     "it": {
         # ---- nav / base ----
@@ -326,5 +332,11 @@ TRANSLATIONS = {
         "Υιοθέτησε μια κυψέλη": "Adotta un alveare",
         "Παρακολούθησε την κυψέλη σου μέσα στη σεζόν και πάρε το μέλι της.": "Segui il tuo alveare durante la stagione e ricevi il suo miele.",
         "Άνοιγμα": "Apri",
+
+        # ---- a11y / nav ----
+        "Μετάβαση στο περιεχόμενο": "Vai al contenuto",
+        "Κύριο μενού": "Menu principale",
+        "Γλώσσα": "Lingua",
+        "Περισσότερα": "Altro",
     },
 }

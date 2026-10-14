@@ -14,6 +14,7 @@
     // Όταν είμαστε ήδη σε σκοτεινό φόντο, δείξε ήλιο (πάτα για να γυρίσεις σε φωτεινό).
     // Όταν είμαστε σε φωτεινό φόντο, δείξε μισοφέγγαρο (πάτα για να πας σε σκοτεινό).
     icon.textContent = current() === 'dark' ? '☀️' : '🌙';
+    btn.setAttribute('aria-pressed', current() === 'dark' ? 'true' : 'false');
   }
 
   btn.addEventListener('click', function () {

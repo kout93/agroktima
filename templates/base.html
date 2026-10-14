@@ -18,11 +18,12 @@
 {% block extra_head %}{% endblock %}
 </head>
 <body>
+<a class="skip-link" href="#main">{{ _('Μετάβαση στο περιεχόμενο') }}</a>
 {% if not stripe_configured %}
 <div class="test-banner">{{ _('🧪 Λειτουργία δοκιμής — οι πληρωμές δεν είναι πραγματικές μέχρι να προστεθεί κλειδί Stripe') }}</div>
 {% endif %}
 {% if daily_reminders %}
-<div class="flash error" style="background:#FCF3D9; color:#7A5A12; display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+<div class="flash error" role="status" style="background:#FCF3D9; color:#7A5A12; display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
   <div>
     🔔 <strong>{{ _('Υπενθυμίσεις σήμερα:') }}</strong>
     <ul style="margin:6px 0 0; padding-left:18px;">
@@ -32,7 +33,7 @@
   <a href="{{ url_for('reminders.dismiss') }}" style="white-space:nowrap; color:#7A5A12; text-decoration:underline;">{{ _('Κλείσιμο για σήμερα') }}</a>
 </div>
 {% endif %}
-<nav>
+<nav aria-label="{{ _('Κύριο μενού') }}">
   <a class="brand" href="{{ url_for('main.home') }}">{{ _('🫒 Αγρόκτημα') }}</a>
   <div class="links">
     {% if current_user %}
@@ -42,10 +43,15 @@
         <a href="{{ url_for('trees.manage_trees') }}">{{ _('Δέντρα μου') }}</a>
         <a href="{{ url_for('hives.manage_hives') }}">{{ _('Μελίσσια μου') }}</a>
         <a href="{{ url_for('planner.calendar_view') }}">{{ _('Πλάνο εργασιών') }}</a>
-        <a href="{{ url_for('stock.overview') }}">{{ _('Απόθεμα') }}</a>
-        <a href="{{ url_for('opekepe.overview') }}">{{ _('ΟΠΕΚΕΠΕ/ΕΛΓΑ') }}</a>
-        <a href="{{ url_for('stats.overview') }}">{{ _('Στατιστικά') }}</a>
-        <a href="{{ url_for('advisor.ask') }}">{{ _('Συμβουλές AI') }}</a>
+        <details class="more">
+          <summary>{{ _('Περισσότερα') }}</summary>
+          <div class="more-panel">
+            <a href="{{ url_for('stock.overview') }}">{{ _('Απόθεμα') }}</a>
+            <a href="{{ url_for('opekepe.overview') }}">{{ _('ΟΠΕΚΕΠΕ/ΕΛΓΑ') }}</a>
+            <a href="{{ url_for('stats.overview') }}">{{ _('Στατιστικά') }}</a>
+            <a href="{{ url_for('advisor.ask') }}">{{ _('Συμβουλές AI') }}</a>
+          </div>
+        </details>
       {% else %}
         <a href="{{ url_for('trees.browse') }}">{{ _('Υιοθέτησε Δέντρο') }}</a>
         <a href="{{ url_for('hives.browse') }}">{{ _('Υιοθέτησε Κυψέλη') }}</a>
@@ -56,9 +62,9 @@
       <a href="{{ url_for('auth.login') }}">{{ _('Σύνδεση') }}</a>
       <a href="{{ url_for('auth.register') }}">{{ _('Εγγραφή') }}</a>
     {% endif %}
-    <span class="lang-switch">
+    <span class="lang-switch" role="group" aria-label="{{ _('Γλώσσα') }}">
       {% for code, label in supported_langs.items() %}
-        <a href="{{ url_for('set_lang', code=code) }}" class="{{ 'active' if code == current_lang else '' }}">{{ label }}</a>
+        <a href="{{ url_for('set_lang', code=code) }}" lang="{{ code }}" hreflang="{{ code }}" class="{{ 'active' if code == current_lang else '' }}"{% if code == current_lang %} aria-current="true"{% endif %}>{{ label }}</a>
       {% endfor %}
     </span>
     <button type="button" id="theme-toggle" class="theme-toggle" aria-label="{{ _('Ξεκούραση ματιών — σκοτεινό φόντο') }}" title="{{ _('Ξεκούραση ματιών (σκοτεινό φόντο)') }}">
@@ -67,15 +73,16 @@
   </div>
 </nav>
 {% block hero %}{% endblock %}
-<div class="wrap">
+<main class="wrap" id="main" tabindex="-1">
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% for category, message in messages %}
-      <div class="flash {{ category }}">{{ message }}</div>
+      <div class="flash {{ category }}" role="{{ 'alert' if category == 'error' else 'status' }}">{{ message }}</div>
     {% endfor %}
   {% endwith %}
   {% block content %}{% endblock %}
-</div>
+</main>
 {% block extra_scripts %}{% endblock %}
 <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+<script src="{{ url_for('static', filename='js/a11y.js') }}"></script>
 </body>
 </html>
