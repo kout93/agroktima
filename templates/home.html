@@ -5,7 +5,7 @@
   <img class="hero-bg" src="https://images.pexels.com/photos/38928225/pexels-photo-38928225.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="Ελαιώνας το ηλιοβασίλεμα" loading="eager">
   <div class="hero-content">
     <h1>{{ _('Το χωράφι σου, στο κινητό σου') }}</h1>
-    <p>{{ _('Καταγραφή κτημάτων, εργασιών και εξόδων για αγρότες — και ένα σύστημα όπου κάποιος μπορεί να «υιοθετήσει» ένα δέντρο ελιάς με αντάλλαγμα το λάδι του.') }}</p>
+    <p>{{ _('Καταγραφή κτημάτων, εργασιών και παραγωγής για κάθε αγρότη — και υιοθεσία δέντρων ελιάς και κυψελών για όποιον θέλει να ξέρει από πού έρχεται το λάδι και το μέλι του.') }}</p>
     <div class="hero-actions">
       {% if not current_user %}
         <a class="btn soil" href="{{ url_for('auth.register') }}">{{ _('Δημιουργία λογαριασμού') }}</a>
@@ -22,20 +22,33 @@
 </div>
 {% endblock %}
 {% block content %}
-{% if not current_user %}
-<div class="card">
-  <h2>{{ _('Ξεκίνα τώρα') }}</h2>
-  <p>{{ _('Αν είσαι αγρότης, φτιάξε λογαριασμό για να καταγράφεις τα κτήματα και τις εργασίες σου.<br>\n  Αν θέλεις να υιοθετήσεις ένα δέντρο ελιάς, φτιάξε λογαριασμό πελάτη.') | safe }}</p>
-</div>
-{% elif current_user['role'] == 'farmer' %}
-<div class="card">
-  <h2>{{ _('Καλώς ήρθες, %(name)s', name=current_user['name']) }}</h2>
-  <p>{{ _('Συνέχισε από εκεί που σταμάτησες — κτήματα, εργασίες, παραγωγή, καιρός και αναφορές, όλα σε ένα μέρος.') }}</p>
-</div>
-{% else %}
-<div class="card">
-  <h2>{{ _('Καλώς ήρθες, %(name)s', name=current_user['name']) }}</h2>
-  <p>{{ _('Βρες ένα δέντρο ελιάς να υιοθετήσεις και παρακολούθησε την πρόοδό του μέχρι τη συγκομιδή.') }}</p>
-</div>
+{% if current_user %}
+<h2 style="margin-bottom:6px;">{{ _('Καλώς ήρθες, %(name)s', name=current_user['name']) }}</h2>
+<p style="margin-bottom:28px;">{{ _('Συνέχισε από εκεί που σταμάτησες.') }}</p>
 {% endif %}
+{% if current_user and current_user['role'] == 'farmer' %}
+  {% set paths = [
+    (url_for('fields.list_fields'), _('Τα κτήματά μου'), _('Κτήματα, εργασίες, συγκομιδές, καιρός και αναφορές σε ένα μέρος.'), 'https://images.pexels.com/photos/38928225/pexels-photo-38928225.jpeg?auto=compress&cs=tinysrgb&w=800'),
+    (url_for('trees.manage_trees'), _('Δέντρα μου'), _('Βάλε δέντρα προς υιοθεσία και ενημέρωνε όσους τα ακολουθούν.'), 'https://images.pexels.com/photos/6184912/pexels-photo-6184912.jpeg?auto=compress&cs=tinysrgb&w=800'),
+    (url_for('hives.manage_hives'), _('Μελίσσια μου'), _('Κυψέλες με θέση στον χάρτη, επιθεωρήσεις και υιοθεσία.'), 'https://images.pexels.com/photos/17543926/pexels-photo-17543926.jpeg?auto=compress&cs=tinysrgb&w=800')
+  ] %}
+{% else %}
+  {% set paths = [
+    (url_for('auth.register'), _('Για αγρότες'), _('Κτήματα, εργασίες, απόθεμα, ΟΠΕΚΕΠΕ/ΕΛΓΑ και σύμβουλος AI, για κάθε καλλιέργεια.'), 'https://images.pexels.com/photos/38928225/pexels-photo-38928225.jpeg?auto=compress&cs=tinysrgb&w=800'),
+    (url_for('trees.browse'), _('Υιοθέτησε ένα δέντρο'), _('Ένα δέντρο ελιάς με όνομα και θέση στον χάρτη. Στο τέλος της σεζόν παίρνεις το λάδι του.'), 'https://images.pexels.com/photos/6184912/pexels-photo-6184912.jpeg?auto=compress&cs=tinysrgb&w=800'),
+    (url_for('hives.browse'), _('Υιοθέτησε μια κυψέλη'), _('Παρακολούθησε την κυψέλη σου μέσα στη σεζόν και πάρε το μέλι της.'), 'https://images.pexels.com/photos/17543926/pexels-photo-17543926.jpeg?auto=compress&cs=tinysrgb&w=800')
+  ] %}
+{% endif %}
+<div class="paths">
+  {% for href, title, text, img in paths %}
+  <a class="path" href="{{ href }}">
+    <div class="path-img"><img src="{{ img }}" alt="" loading="lazy"></div>
+    <div class="path-body">
+      <h3>{{ title }}</h3>
+      <p>{{ text }}</p>
+      <span class="path-go">{{ _('Άνοιγμα') }}</span>
+    </div>
+  </a>
+  {% endfor %}
+</div>
 {% endblock %}

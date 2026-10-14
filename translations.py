@@ -165,6 +165,21 @@ TRANSLATIONS = {
         "Η (δοκιμαστική) πληρωμή ολοκληρώθηκε — η κυψέλη είναι δική σου!": "The (test) payment is complete — the hive is yours!",
         "Η πληρωμή ολοκληρώθηκε — η κυψέλη είναι δική σου!": "Payment complete — the hive is yours!",
         "Η κυψέλη δεν βρέθηκε.": "Hive not found.",
+
+        # ---- home (premium) ----
+        "Καταγραφή κτημάτων, εργασιών και παραγωγής για κάθε αγρότη — και υιοθεσία δέντρων ελιάς και κυψελών για όποιον θέλει να ξέρει από πού έρχεται το λάδι και το μέλι του.":
+            "Track fields, tasks and harvests for any farm — and adopt olive trees and beehives if you want to know where your oil and honey come from.",
+        "Συνέχισε από εκεί που σταμάτησες.": "Pick up where you left off.",
+        "Κτήματα, εργασίες, συγκομιδές, καιρός και αναφορές σε ένα μέρος.": "Fields, tasks, harvests, weather and reports in one place.",
+        "Βάλε δέντρα προς υιοθεσία και ενημέρωνε όσους τα ακολουθούν.": "List trees for adoption and keep their followers updated.",
+        "Κυψέλες με θέση στον χάρτη, επιθεωρήσεις και υιοθεσία.": "Hives with a map location, inspections and adoption.",
+        "Για αγρότες": "For farmers",
+        "Κτήματα, εργασίες, απόθεμα, ΟΠΕΚΕΠΕ/ΕΛΓΑ και σύμβουλος AI, για κάθε καλλιέργεια.": "Fields, tasks, stock, subsidy reports and an AI advisor, for any crop.",
+        "Υιοθέτησε ένα δέντρο": "Adopt a tree",
+        "Ένα δέντρο ελιάς με όνομα και θέση στον χάρτη. Στο τέλος της σεζόν παίρνεις το λάδι του.": "An olive tree with a name and a place on the map. At the end of the season you receive its oil.",
+        "Υιοθέτησε μια κυψέλη": "Adopt a hive",
+        "Παρακολούθησε την κυψέλη σου μέσα στη σεζόν και πάρε το μέλι της.": "Follow your hive through the season and receive its honey.",
+        "Άνοιγμα": "Open",
     },
     "it": {
         # ---- nav / base ----
@@ -296,5 +311,20 @@ TRANSLATIONS = {
         "Η (δοκιμαστική) πληρωμή ολοκληρώθηκε — η κυψέλη είναι δική σου!": "Il pagamento (di prova) è completato — l'alveare è tuo!",
         "Η πληρωμή ολοκληρώθηκε — η κυψέλη είναι δική σου!": "Pagamento completato — l'alveare è tuo!",
         "Η κυψέλη δεν βρέθηκε.": "Alveare non trovato.",
+
+        # ---- home (premium) ----
+        "Καταγραφή κτημάτων, εργασιών και παραγωγής για κάθε αγρότη — και υιοθεσία δέντρων ελιάς και κυψελών για όποιον θέλει να ξέρει από πού έρχεται το λάδι και το μέλι του.":
+            "Registra terreni, lavori e raccolti di ogni azienda agricola — e adotta ulivi e alveari se vuoi sapere da dove arrivano il tuo olio e il tuo miele.",
+        "Συνέχισε από εκεί που σταμάτησες.": "Riprendi da dove avevi lasciato.",
+        "Κτήματα, εργασίες, συγκομιδές, καιρός και αναφορές σε ένα μέρος.": "Terreni, lavori, raccolti, meteo e report in un unico posto.",
+        "Βάλε δέντρα προς υιοθεσία και ενημέρωνε όσους τα ακολουθούν.": "Metti alberi in adozione e tieni aggiornati chi li segue.",
+        "Κυψέλες με θέση στον χάρτη, επιθεωρήσεις και υιοθεσία.": "Alveari con posizione sulla mappa, ispezioni e adozione.",
+        "Για αγρότες": "Per gli agricoltori",
+        "Κτήματα, εργασίες, απόθεμα, ΟΠΕΚΕΠΕ/ΕΛΓΑ και σύμβουλος AI, για κάθε καλλιέργεια.": "Terreni, lavori, giacenze, report sussidi e consulente AI, per ogni coltura.",
+        "Υιοθέτησε ένα δέντρο": "Adotta un albero",
+        "Ένα δέντρο ελιάς με όνομα και θέση στον χάρτη. Στο τέλος της σεζόν παίρνεις το λάδι του.": "Un ulivo con un nome e un posto sulla mappa. A fine stagione ricevi il suo olio.",
+        "Υιοθέτησε μια κυψέλη": "Adotta un alveare",
+        "Παρακολούθησε την κυψέλη σου μέσα στη σεζόν και πάρε το μέλι της.": "Segui il tuo alveare durante la stagione e ricevi il suo miele.",
+        "Άνοιγμα": "Apri",
     },
 }
