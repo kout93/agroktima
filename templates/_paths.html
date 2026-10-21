@@ -1,0 +1,12 @@
+<div class="paths">
+  {% for href, title, text, img in paths %}
+  <a class="path" href="{{ href }}">
+    <div class="path-img"><img src="{{ img }}" alt="" loading="lazy"></div>
+    <div class="path-body">
+      <h3>{{ title }}</h3>
+      <p>{{ text }}</p>
+      <span class="path-go">{{ _('Άνοιγμα') }}</span>
+    </div>
+  </a>
+  {% endfor %}
+</div>
