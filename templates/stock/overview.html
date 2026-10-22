@@ -35,7 +35,7 @@
 
 <div class="card">
   <h2>Καταχώρηση διάθεσης</h2>
-  <p style="font-size:.86rem;">π.χ. πούλησες λάδι, έδωσες σε πελάτη, ή χάθηκε κάτι — αφαιρείται αυτόματα από το διαθέσιμο απόθεμα.</p>
+  <p style="font-size:.86rem;">π.χ. πούλησες λάδι στον έμπορο, έδωσες σε πελάτη, ή χάθηκε κάτι — αφαιρείται αυτόματα από το διαθέσιμο απόθεμα. Οι πωλήσεις με ποσό μπαίνουν στα έσοδά σου.</p>
   {% if product_options %}
   <form method="post" action="{{ url_for('stock.new_outflow') }}">
     <label>Είδος</label>
@@ -54,6 +54,10 @@
       <option value="{{ r }}">{{ r }}</option>
       {% endfor %}
     </select>
+    <label>Αν πούλησες: συνολικό ποσό που εισέπραξες (€)</label>
+    <input type="text" inputmode="decimal" name="amount_eur" placeholder="π.χ. 1500 (προαιρετικό, μόνο για πώληση)">
+    <label>Αν πούλησες: σε ποιον (έμπορος / πελάτης)</label>
+    <input type="text" name="buyer" placeholder="προαιρετικό">
     <label>Σημειώσεις</label>
     <textarea name="notes"></textarea>
     <button class="btn soil" type="submit">Καταχώρηση</button>
@@ -67,7 +71,7 @@
   <h2>Ιστορικό διαθέσεων</h2>
   {% if outflow_history %}
   <table>
-    <thead><tr><th>Ημερομηνία</th><th>Είδος</th><th>Ποσότητα</th><th>Αιτία</th><th>Σημειώσεις</th><th></th></tr></thead>
+    <thead><tr><th>Ημερομηνία</th><th>Είδος</th><th>Ποσότητα</th><th>Αιτία</th><th>Ποσό</th><th>Σε ποιον</th><th>Σημειώσεις</th><th></th></tr></thead>
     <tbody>
       {% for o in outflow_history %}
       <tr>
@@ -75,6 +79,8 @@
         <td>{{ o['product'] }}</td>
         <td>{{ "%.2f"|format(o['quantity_kg']) }} κιλά</td>
         <td>{{ o['reason'] }}</td>
+        <td>{% if o['amount_eur'] is not none %}{{ "%.2f"|format(o['amount_eur']) }}€{% else %}—{% endif %}</td>
+        <td>{{ o['buyer'] or '—' }}</td>
         <td>{{ o['notes'] or '—' }}</td>
         <td>
           <form method="post" action="{{ url_for('stock.delete_outflow', outflow_id=o['id']) }}" onsubmit="return confirm('Διαγραφή;');">

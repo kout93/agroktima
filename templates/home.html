@@ -3,20 +3,26 @@
 {% block hero %}
 <section class="home-hero">
   <div class="sec-in hero-inner">
+    {% if current_user and current_user['role'] != 'farmer' %}
     <h1>{{ _('Από το χωράφι') }}<br><span class="accent">{{ _('στο τραπέζι σου.') }}</span></h1>
-    <p class="lede">{{ _('Το Αγρόκτημα είναι για παραγωγούς και για όσους θέλουν να ξέρουν από πού έρχεται το φαγητό τους. Οι παραγωγοί κρατούν κτήματα, εργασίες και παραγωγή σε ένα μέρος. Όποιος άλλος θέλει, υιοθετεί ένα δέντρο ελιάς ή μια κυψέλη και παίρνει στο τέλος της σεζόν το λάδι ή το μέλι της.') }}</p>
+    <p class="lede">{{ _('Υιοθέτησε ένα δέντρο ελιάς ή μια κυψέλη, δες πού βρίσκεται και πάρε στο τέλος της σεζόν το λάδι ή το μέλι της.') }}</p>
+    <div class="hero-actions">
+      <a class="btn soil" href="{{ url_for('trees.browse') }}">{{ _('Υιοθέτησε ένα δέντρο') }}</a>
+      <a class="btn ghost" href="{{ url_for('trees.my_adoptions') }}">{{ _('Οι υιοθεσίες μου') }}</a>
+    </div>
+    {% else %}
+    <h1>{{ _('Το αγρόκτημά σου') }}<br><span class="accent">{{ _('σε ένα μέρος.') }}</span></h1>
+    <p class="lede">{{ _('Βάλε τα χωράφια σου, γράψε έξοδα και έσοδα και δες αν βγάζεις κέρδος. Αν θέλεις, μπορείς να πουλάς και κατευθείαν στον κόσμο μέσω υιοθεσίας δέντρων.') }}</p>
     <div class="hero-actions">
       {% if not current_user %}
-        <a class="btn soil" href="{{ url_for('trees.browse') }}">{{ _('Υιοθέτησε ένα δέντρο') }}</a>
-        <a class="btn ghost" href="{{ url_for('auth.register') }}">{{ _('Είμαι αγρότης') }}</a>
-      {% elif current_user['role'] == 'farmer' %}
-        <a class="btn soil" href="{{ url_for('fields.list_fields') }}">{{ _('Τα κτήματά μου') }}</a>
-        <a class="btn ghost" href="{{ url_for('trees.manage_trees') }}">{{ _('Δέντρα μου') }}</a>
+        <a class="btn soil" href="{{ url_for('auth.register') }}">{{ _('Δημιουργία λογαριασμού αγρότη') }}</a>
+        <a class="btn ghost" href="{{ url_for('auth.login') }}">{{ _('Σύνδεση') }}</a>
       {% else %}
-        <a class="btn soil" href="{{ url_for('trees.browse') }}">{{ _('Υιοθέτησε ένα δέντρο') }}</a>
-        <a class="btn ghost" href="{{ url_for('trees.my_adoptions') }}">{{ _('Οι υιοθεσίες μου') }}</a>
+        <a class="btn soil" href="{{ url_for('fields.list_fields') }}">{{ _('Τα κτήματά μου') }}</a>
+        <a class="btn ghost" href="{{ url_for('stats.overview') }}">{{ _('Έσοδα & Έξοδα') }}</a>
       {% endif %}
     </div>
+    {% endif %}
   </div>
   <svg class="hill" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
     <defs><clipPath id="hill-clip"><path d="M170 300 C290 120 460 44 610 42 C770 40 910 112 1030 218 L1060 300Z"/></clipPath></defs>
@@ -43,15 +49,46 @@
 <section class="trust">
   <div class="sec-in">
     <ul>
-      <li>{{ _('Κάθε δέντρο με θέση στον χάρτη') }}</li>
-      <li>{{ _('Ενημερώσεις με φωτογραφίες από τον παραγωγό') }}</li>
-      <li>{{ _('Ελιά και μέλι') }}</li>
+      <li>{{ _('Κτήματα με χάρτη') }}</li>
+      <li>{{ _('Έσοδα και έξοδα') }}</li>
+      <li>{{ _('Συγκομιδές και απόθεμα') }}</li>
       <li>{{ _('Για κάθε καλλιέργεια') }}</li>
     </ul>
   </div>
 </section>
 
 <section class="sec sec-sage">
+  <div class="sec-in">
+    <h2 class="sec-title">{{ _('Δύο τρόποι να') }} <span class="accent">{{ _('το χρησιμοποιήσεις.') }}</span></h2>
+    <div class="audience">
+      <div class="aud">
+        <div class="orb orb-sm o-sage"><img src="https://images.pexels.com/photos/15112921/pexels-photo-15112921.jpeg?auto=compress&cs=tinysrgb&w=500" alt="" loading="lazy"></div>
+        <h3>{{ _('1. Κράτα το αγρόκτημά σου σε τάξη') }}</h3>
+        <ul class="ticks">
+          <li>{{ _('Καταγράφεις κτήματα με χάρτη και εργασίες.') }}</li>
+          <li>{{ _('Γράφεις έξοδα και πωλήσεις και βλέπεις το αποτέλεσμα.') }}</li>
+          <li>{{ _('Σημειώνεις συγκομιδές και βλέπεις πόσο απόθεμα σου έχει μείνει.') }}</li>
+          <li>{{ _('Παίρνεις υπενθυμίσεις και συμβουλές για οποιαδήποτε καλλιέργεια.') }}</li>
+          <li>{{ _('Ετοιμάζεις τα στοιχεία για ΟΠΕΚΕΠΕ/ΕΛΓΑ.') }}</li>
+        </ul>
+        <a class="btn" href="{{ url_for('auth.register') }}">{{ _('Δημιουργία λογαριασμού αγρότη') }}</a>
+      </div>
+      <div class="aud">
+        <div class="orb orb-sm o-sun"><img src="https://images.pexels.com/photos/6184912/pexels-photo-6184912.jpeg?auto=compress&cs=tinysrgb&w=500" alt="" loading="lazy"></div>
+        <h3>{{ _('2. Πούλησε μόνος σου, μέσω υιοθεσίας') }} <span class="badge available">{{ _('προαιρετικό') }}</span></h3>
+        <ul class="ticks">
+          <li>{{ _('Βάζεις δέντρα ή κυψέλες προς υιοθεσία, με φωτογραφία και θέση στον χάρτη.') }}</li>
+          <li>{{ _('Ο κόσμος πληρώνει μια ετήσια συνδρομή και ακολουθεί το δέντρο του.') }}</li>
+          <li>{{ _('Τους ενημερώνεις με φωτογραφίες μέσα στη σεζόν.') }}</li>
+          <li>{{ _('Στο τέλος παίρνουν το λάδι ή το μέλι, και την παράδοση τη συνεννοείς εσύ.') }}</li>
+        </ul>
+        <a class="btn soil" href="{{ url_for('trees.browse') }}">{{ _('Δες δέντρα προς υιοθεσία') }}</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec-peach">
   <div class="sec-in">
     <h2 class="sec-title">{{ _('Πώς δουλεύει') }} <span class="accent">{{ _('η υιοθεσία.') }}</span></h2>
     <div class="steps">
@@ -78,49 +115,6 @@
     </div>
   </div>
 </section>
-
-<section class="sec sec-peach">
-  <div class="sec-in">
-    <h2 class="sec-title">{{ _('Για ποιον') }} <span class="accent">{{ _('είναι.') }}</span></h2>
-    <div class="audience">
-      <div class="aud">
-        <div class="orb orb-sm o-sage"><img src="https://images.pexels.com/photos/15112921/pexels-photo-15112921.jpeg?auto=compress&cs=tinysrgb&w=500" alt="" loading="lazy"></div>
-        <h3>{{ _('Αν είσαι αγρότης ή μελισσοκόμος') }}</h3>
-        <ul class="ticks">
-          <li>{{ _('Καταγράφεις κτήματα με χάρτη, εργασίες και έξοδα.') }}</li>
-          <li>{{ _('Σημειώνεις συγκομιδές και βλέπεις πόσο απόθεμα σου έχει μείνει.') }}</li>
-          <li>{{ _('Παίρνεις υπενθυμίσεις και συμβουλές για οποιαδήποτε καλλιέργεια.') }}</li>
-          <li>{{ _('Ετοιμάζεις τα στοιχεία για ΟΠΕΚΕΠΕ/ΕΛΓΑ.') }}</li>
-          <li>{{ _('Βάζεις δέντρα ή κυψέλες προς υιοθεσία και ενημερώνεις όσους τα ακολουθούν.') }}</li>
-        </ul>
-        <a class="btn" href="{{ url_for('auth.register') }}">{{ _('Δημιουργία λογαριασμού αγρότη') }}</a>
-      </div>
-      <div class="aud">
-        <div class="orb orb-sm o-sun"><img src="https://images.pexels.com/photos/9105966/pexels-photo-9105966.jpeg?auto=compress&cs=tinysrgb&w=500" alt="" loading="lazy"></div>
-        <h3>{{ _('Αν θέλεις να υιοθετήσεις') }}</h3>
-        <ul class="ticks">
-          <li>{{ _('Διαλέγεις ένα δέντρο ή μια κυψέλη και βλέπεις στον χάρτη πού βρίσκεται.') }}</li>
-          <li>{{ _('Πληρώνεις μια ετήσια συνδρομή.') }}</li>
-          <li>{{ _('Μέσα στη σεζόν βλέπεις ενημερώσεις με φωτογραφίες από τον παραγωγό.') }}</li>
-          <li>{{ _('Στο τέλος παίρνεις το λάδι ή το μέλι.') }}</li>
-        </ul>
-        <a class="btn soil" href="{{ url_for('trees.browse') }}">{{ _('Δες δέντρα προς υιοθεσία') }}</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="sec sec-sun">
-  <div class="sec-in">
-    <h2 class="sec-title">{{ _('Ξεκίνα') }} <span class="accent">{{ _('από εδώ.') }}</span></h2>
-    {% set paths = [
-      (url_for('auth.register'), _('Για αγρότες'), _('Κτήματα, εργασίες, απόθεμα, ΟΠΕΚΕΠΕ/ΕΛΓΑ και σύμβουλος AI, για κάθε καλλιέργεια.'), 'https://images.pexels.com/photos/38928225/pexels-photo-38928225.jpeg?auto=compress&cs=tinysrgb&w=800'),
-      (url_for('trees.browse'), _('Υιοθέτησε ένα δέντρο'), _('Ένα δέντρο ελιάς με όνομα και θέση στον χάρτη. Στο τέλος της σεζόν παίρνεις το λάδι του.'), 'https://images.pexels.com/photos/6184912/pexels-photo-6184912.jpeg?auto=compress&cs=tinysrgb&w=800'),
-      (url_for('hives.browse'), _('Υιοθέτησε μια κυψέλη'), _('Παρακολούθησε την κυψέλη σου μέσα στη σεζόν και πάρε το μέλι της.'), 'https://images.pexels.com/photos/17543926/pexels-photo-17543926.jpeg?auto=compress&cs=tinysrgb&w=800')
-    ] %}
-    {% include "_paths.html" %}
-  </div>
-</section>
 {% endif %}
 {% endblock %}
 
@@ -131,8 +125,8 @@
 {% if current_user['role'] == 'farmer' %}
   {% set paths = [
     (url_for('fields.list_fields'), _('Τα κτήματά μου'), _('Κτήματα, εργασίες, συγκομιδές, καιρός και αναφορές σε ένα μέρος.'), 'https://images.pexels.com/photos/38928225/pexels-photo-38928225.jpeg?auto=compress&cs=tinysrgb&w=800'),
-    (url_for('trees.manage_trees'), _('Δέντρα μου'), _('Βάλε δέντρα προς υιοθεσία και ενημέρωνε όσους τα ακολουθούν.'), 'https://images.pexels.com/photos/6184912/pexels-photo-6184912.jpeg?auto=compress&cs=tinysrgb&w=800'),
-    (url_for('hives.manage_hives'), _('Μελίσσια μου'), _('Κυψέλες με θέση στον χάρτη, επιθεωρήσεις και υιοθεσία.'), 'https://images.pexels.com/photos/17543926/pexels-photo-17543926.jpeg?auto=compress&cs=tinysrgb&w=800')
+    (url_for('stats.overview'), _('Έσοδα & Έξοδα'), _('Δες τι έβγαλες και τι ξόδεψες, και το αποτέλεσμα της χρονιάς.'), 'https://images.pexels.com/photos/31694878/pexels-photo-31694878.jpeg?auto=compress&cs=tinysrgb&w=800'),
+    (url_for('trees.manage_trees'), _('Πώληση μέσω υιοθεσίας'), _('Προαιρετικά: βάλε δέντρα προς υιοθεσία και πούλα κατευθείαν στον κόσμο.'), 'https://images.pexels.com/photos/6184912/pexels-photo-6184912.jpeg?auto=compress&cs=tinysrgb&w=800')
   ] %}
 {% else %}
   {% set paths = [

@@ -46,6 +46,8 @@ def init_db():
     _ensure_column(conn, "users", "calendar_token", "TEXT")
     _ensure_column(conn, "fields", "boundary_points", "TEXT")
     _ensure_column(conn, "trees", "photo_filename", "TEXT")
+    _ensure_column(conn, "stock_outflows", "amount_eur", "REAL")
+    _ensure_column(conn, "stock_outflows", "buyer", "TEXT")
     conn.commit()
     conn.close()
 

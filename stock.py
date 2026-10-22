@@ -72,6 +72,21 @@ def new_outflow():
     outflow_date = request.form.get("outflow_date", "").strip()
     reason = request.form.get("reason", "").strip()
     notes = request.form.get("notes", "").strip()
+    buyer = request.form.get("buyer", "").strip()
+    amount_raw = request.form.get("amount_eur", "").strip().replace(",", ".")
+    amount_eur = None
+    if amount_raw:
+        try:
+            amount_eur = float(amount_raw)
+        except ValueError:
+            flash("Το ποσό πρέπει να είναι αριθμός.", "error")
+            return redirect(url_for("stock.overview"))
+        if amount_eur < 0:
+            flash("Το ποσό δεν μπορεί να είναι αρνητικό.", "error")
+            return redirect(url_for("stock.overview"))
+    if reason != "Πώληση":
+        amount_eur = None
+        buyer = ""
 
     if not product or not quantity_kg or not outflow_date or reason not in OUTFLOW_REASONS:
         flash("Συμπλήρωσε είδος, ποσότητα, ημερομηνία και αιτία.", "error")
@@ -97,9 +112,9 @@ def new_outflow():
         return redirect(url_for("stock.overview"))
 
     db.execute(
-        """INSERT INTO stock_outflows (farmer_id, product, quantity_kg, outflow_date, reason, notes)
-           VALUES (?, ?, ?, ?, ?, ?)""",
-        (user["id"], product, qty, outflow_date, reason, notes or None),
+        """INSERT INTO stock_outflows (farmer_id, product, quantity_kg, outflow_date, reason, notes, amount_eur, buyer)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+        (user["id"], product, qty, outflow_date, reason, notes or None, amount_eur, buyer or None),
     )
     db.commit()
     flash("Η διάθεση καταχωρήθηκε.", "success")

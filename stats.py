@@ -35,6 +35,14 @@ def overview():
         (user["id"],),
     ).fetchone()
 
+    sales_income = db.execute(
+        """SELECT COALESCE(SUM(amount_eur), 0) AS total, COUNT(amount_eur) AS count
+           FROM stock_outflows
+           WHERE farmer_id = ? AND reason = 'Πώληση' AND amount_eur IS NOT NULL""",
+        (user["id"],),
+    ).fetchone()
+    total_income = sales_income["total"] + adoption_income["total"]
+
     tree_counts = db.execute(
         """SELECT
              COUNT(*) AS total,
@@ -59,6 +67,9 @@ def overview():
         total_cost=total_cost,
         max_cost=max_cost,
         adoption_income=adoption_income,
+        sales_income=sales_income,
+        total_income=total_income,
+        profit=total_income - total_cost,
         tree_counts=tree_counts,
         production_totals=production_totals,
     )

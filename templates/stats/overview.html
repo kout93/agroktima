@@ -1,22 +1,23 @@
 {% extends "base.html" %}
-{% block title %}Στατιστικά{% endblock %}
+{% block title %}Έσοδα & έξοδα{% endblock %}
 {% block content %}
-<h1>Παραγωγή & Έξοδα</h1>
+<h1>Έσοδα, έξοδα & παραγωγή</h1>
 
 <div class="stat-row">
+  <div class="stat">
+    <div class="stat-num">{{ "%.2f"|format(total_income) }}€</div>
+    <div class="stat-label">Σύνολο εσόδων</div>
+  </div>
   <div class="stat">
     <div class="stat-num">{{ "%.2f"|format(total_cost) }}€</div>
     <div class="stat-label">Σύνολο εξόδων (όλα τα κτήματα)</div>
   </div>
   <div class="stat">
-    <div class="stat-num">{{ "%.2f"|format(adoption_income['total']) }}€</div>
-    <div class="stat-label">Έσοδα από υιοθεσίες ({{ adoption_income['count'] }} πληρωμένες)</div>
-  </div>
-  <div class="stat">
-    <div class="stat-num">{{ tree_counts['adopted'] or 0 }}/{{ tree_counts['total'] or 0 }}</div>
-    <div class="stat-label">Υιοθετημένα δέντρα</div>
+    <div class="stat-num">{{ "%.2f"|format(profit) }}€</div>
+    <div class="stat-label">Αποτέλεσμα (έσοδα − έξοδα)</div>
   </div>
 </div>
+<p style="font-size:.88rem;">Έσοδα: {{ "%.2f"|format(sales_income['total']) }}€ από {{ sales_income['count'] }} πωλήσεις προϊόντος (καταχωρούνται στο <a href="{{ url_for('stock.overview') }}">Απόθεμα</a>) και {{ "%.2f"|format(adoption_income['total']) }}€ από {{ adoption_income['count'] }} υιοθεσίες δέντρων. Δέντρα που έχουν υιοθετηθεί: {{ tree_counts['adopted'] or 0 }}/{{ tree_counts['total'] or 0 }}.</p>
 
 <div class="card">
   <h2>Συνολική παραγωγή</h2>
