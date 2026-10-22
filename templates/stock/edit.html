@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Διόρθωση διάθεσης{% endblock %}
+{% block content %}
+<div class="card" style="max-width:520px;">
+  <h1>Διόρθωση διάθεσης</h1>
+  <form method="post">
+    <label>Είδος</label>
+    <select name="product" required>
+      {% for p in product_options %}<option value="{{ p }}" {{ 'selected' if p == o['product'] }}>{{ p }}</option>{% endfor %}
+    </select>
+    <label>Ποσότητα (κιλά)</label>
+    <input type="text" inputmode="decimal" name="quantity_kg" value="{{ o['quantity_kg'] }}" required>
+    <label>Ημερομηνία</label>
+    <input type="date" name="outflow_date" value="{{ o['outflow_date'] }}" required>
+    <label>Αιτία</label>
+    <select name="reason" required>
+      {% for r in reasons %}<option value="{{ r }}" {{ 'selected' if r == o['reason'] }}>{{ r }}</option>{% endfor %}
+    </select>
+    <label>Αν πούλησες: συνολικό ποσό που εισέπραξες (€)</label>
+    <input type="text" inputmode="decimal" name="amount_eur" value="{{ o['amount_eur'] if o['amount_eur'] is not none else '' }}">
+    <label>Αν πούλησες: σε ποιον (έμπορος / πελάτης)</label>
+    <input type="text" name="buyer" value="{{ o['buyer'] or '' }}">
+    <label>Σημειώσεις</label>
+    <textarea name="notes">{{ o['notes'] or '' }}</textarea>
+    <button class="btn soil" type="submit">Αποθήκευση</button>
+    <a class="btn ghost" href="{{ url_for('stock.overview') }}">Ακύρωση</a>
+  </form>
+</div>
+{% endblock %}

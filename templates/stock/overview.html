@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Απόθεμα παραγωγής{% endblock %}
 {% block content %}
-<h1>Απόθεμα παραγωγής</h1>
+<h1>Απόθεμα & πωλήσεις</h1>
 <p>Πόσο από την παραγωγή σου (σε όλα τα κτήματα) έχεις ακόμα αδιάθετο.</p>
 
 {% if stock_rows %}
@@ -34,7 +34,7 @@
 {% endif %}
 
 <div class="card">
-  <h2>Καταχώρηση διάθεσης</h2>
+  <h2 id="sale">Καταχώρηση πώλησης ή άλλης διάθεσης</h2>
   <p style="font-size:.86rem;">π.χ. πούλησες λάδι στον έμπορο, έδωσες σε πελάτη, ή χάθηκε κάτι — αφαιρείται αυτόματα από το διαθέσιμο απόθεμα. Οι πωλήσεις με ποσό μπαίνουν στα έσοδά σου.</p>
   {% if product_options %}
   <form method="post" action="{{ url_for('stock.new_outflow') }}">
@@ -82,8 +82,9 @@
         <td>{% if o['amount_eur'] is not none %}{{ "%.2f"|format(o['amount_eur']) }}€{% else %}—{% endif %}</td>
         <td>{{ o['buyer'] or '—' }}</td>
         <td>{{ o['notes'] or '—' }}</td>
-        <td>
-          <form method="post" action="{{ url_for('stock.delete_outflow', outflow_id=o['id']) }}" onsubmit="return confirm('Διαγραφή;');">
+        <td style="white-space:nowrap;">
+          <a class="btn ghost" href="{{ url_for('stock.edit_outflow', outflow_id=o['id']) }}" style="margin:0 4px 0 0; padding:5px 9px; font-size:.76rem;">Διόρθωση</a>
+          <form method="post" style="display:inline;" action="{{ url_for('stock.delete_outflow', outflow_id=o['id']) }}" onsubmit="return confirm('Διαγραφή;');">
             <button class="btn ghost" type="submit" style="margin:0; padding:5px 9px; font-size:.76rem;">Διαγραφή</button>
           </form>
         </td>

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Διόρθωση παραγωγής{% endblock %}
+{% block content %}
+<div class="card" style="max-width:520px;">
+  <h1>Διόρθωση παραγωγής</h1>
+  <p>{{ field['name'] }}</p>
+  <form method="post">
+    <label>Ημερομηνία συγκομιδής</label>
+    <input type="date" name="harvest_date" value="{{ h['harvest_date'] }}" required>
+    <label>Είδος</label>
+    <input type="text" name="product" list="product-suggestions" value="{{ h['product'] }}" required>
+    <datalist id="product-suggestions">{% for p in product_types %}<option value="{{ p }}">{% endfor %}</datalist>
+    <label>Ποσότητα (κιλά)</label>
+    <input type="text" inputmode="decimal" name="quantity_kg" value="{{ h['quantity_kg'] }}" required>
+    <label>Σημειώσεις</label>
+    <textarea name="notes">{{ h['notes'] or '' }}</textarea>
+    <button class="btn soil" type="submit">Αποθήκευση</button>
+    <a class="btn ghost" href="{{ url_for('fields.view_field', field_id=field['id']) }}">Ακύρωση</a>
+  </form>
+</div>
+{% endblock %}

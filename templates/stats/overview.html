@@ -20,6 +20,12 @@
 <p style="font-size:.88rem;">Έσοδα: {{ "%.2f"|format(sales_income['total']) }}€ από {{ sales_income['count'] }} πωλήσεις προϊόντος (καταχωρούνται στο <a href="{{ url_for('stock.overview') }}">Απόθεμα</a>) και {{ "%.2f"|format(adoption_income['total']) }}€ από {{ adoption_income['count'] }} υιοθεσίες δέντρων. Δέντρα που έχουν υιοθετηθεί: {{ tree_counts['adopted'] or 0 }}/{{ tree_counts['total'] or 0 }}.</p>
 
 <div class="card">
+  <h2>Πού καταχωρώ μια πώληση;</h2>
+  <p>Πούλησες λάδι ή άλλο προϊόν; Καταχώρησέ το με το ποσό που εισέπραξες και θα μπει στα έσοδα εδώ.</p>
+  <a class="btn soil" href="{{ url_for('stock.overview') }}#sale">Καταχώρηση πώλησης</a>
+</div>
+
+<div class="card">
   <h2>Συνολική παραγωγή</h2>
   {% if production_totals %}
   <div class="stat-row">

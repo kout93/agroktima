@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Διόρθωση εργασίας{% endblock %}
+{% block content %}
+<div class="card" style="max-width:520px;">
+  <h1>Διόρθωση εργασίας</h1>
+  <p>{{ field['name'] }}</p>
+  <form method="post" enctype="multipart/form-data">
+    <label>Τύπος εργασίας</label>
+    <select name="task_type" required>
+      {% for x in task_types %}<option value="{{ x }}" {{ 'selected' if x == t['task_type'] }}>{{ x }}</option>{% endfor %}
+    </select>
+    <label>Ημερομηνία</label>
+    <input type="date" name="task_date" value="{{ t['task_date'] }}" required>
+    <label>Κόστος (€)</label>
+    <input type="text" inputmode="decimal" name="cost" value="{{ t['cost'] or 0 }}">
+    <label>Σημειώσεις</label>
+    <textarea name="notes">{{ t['notes'] or '' }}</textarea>
+    <label>Νέα φωτογραφία (αν δεν βάλεις, μένει η υπάρχουσα)</label>
+    <input type="file" name="photo" accept="image/*">
+    <button class="btn" type="submit">Αποθήκευση</button>
+    <a class="btn ghost" href="{{ url_for('fields.view_field', field_id=field['id']) }}">Ακύρωση</a>
+  </form>
+</div>
+{% endblock %}

@@ -58,26 +58,46 @@ def new_field():
         area = request.form.get("area_stremma", "").strip()
         crop = request.form.get("crop", "").strip()
         tree_count = request.form.get("tree_count", "").strip()
-        latitude = request.form.get("latitude", "").strip()
-        longitude = request.form.get("longitude", "").strip()
-
         if not name:
             flash("Το όνομα του κτήματος είναι υποχρεωτικό.", "error")
             return render_template("fields/new.html")
 
+        try:
+            points = json.loads(request.form.get("points_json", "[]"))
+            points = [[float(p[0]), float(p[1])] for p in points]
+        except (ValueError, TypeError, IndexError):
+            points = []
+
+        try:
+            area_val = float(area.replace(",", ".")) if area else None
+            trees_val = int(tree_count) if tree_count else 0
+        except ValueError:
+            flash("Η έκταση και ο αριθμός δέντρων πρέπει να είναι αριθμοί.", "error")
+            return render_template("fields/new.html")
+
+        latitude = longitude = boundary_json = None
+        if len(points) >= 3:
+            # Το περίγραμμα που σημάδεψε ο αγρότης δίνει εμβαδόν και κέντρο αυτόματα.
+            area_val = round(polygon_area_stremma(points), 3)
+            latitude, longitude = polygon_centroid(points)
+            boundary_json = json.dumps(points)
+        elif len(points) in (1, 2):
+            latitude, longitude = points[0]
+
         db = get_db()
         db.execute(
-            """INSERT INTO fields (farmer_id, name, location, area_stremma, crop, tree_count, latitude, longitude)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            """INSERT INTO fields (farmer_id, name, location, area_stremma, crop, tree_count, latitude, longitude, boundary_points)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 current_user()["id"],
                 name,
                 location or None,
-                float(area) if area else None,
+                area_val,
                 crop or None,
-                int(tree_count) if tree_count else 0,
-                float(latitude) if latitude else None,
-                float(longitude) if longitude else None,
+                trees_val,
+                latitude,
+                longitude,
+                boundary_json,
             ),
         )
         db.commit()
@@ -271,3 +291,95 @@ def new_harvest(field_id):
     db.commit()
     flash("Η παραγωγή καταχωρήθηκε.", "success")
     return redirect(url_for("fields.view_field", field_id=field_id))
+
+
+def _own_field(db, field_id):
+    return db.execute(
+        "SELECT * FROM fields WHERE id = ? AND farmer_id = ?", (field_id, current_user()["id"])
+    ).fetchone()
+
+
+@bp.route("/<int:field_id>/harvests/<int:harvest_id>/edit", methods=["GET", "POST"])
+@role_required("farmer")
+def edit_harvest(field_id, harvest_id):
+    db = get_db()
+    field = _own_field(db, field_id)
+    h = db.execute("SELECT * FROM harvests WHERE id = ? AND field_id = ?", (harvest_id, field_id)).fetchone() if field else None
+    if h is None:
+        flash("Η καταχώρηση δεν βρέθηκε.", "error")
+        return redirect(url_for("fields.list_fields"))
+
+    if request.method == "POST":
+        harvest_date = request.form.get("harvest_date", "").strip()
+        product = request.form.get("product", "").strip()
+        qty_raw = request.form.get("quantity_kg", "").strip().replace(",", ".")
+        notes = request.form.get("notes", "").strip()
+        try:
+            qty = float(qty_raw)
+        except ValueError:
+            qty = -1
+        if not harvest_date or not product or qty <= 0:
+            flash("Συμπλήρωσε ημερομηνία, είδος και θετική ποσότητα.", "error")
+            return redirect(url_for("fields.edit_harvest", field_id=field_id, harvest_id=harvest_id))
+
+        # Η διόρθωση δεν πρέπει να αφήσει το απόθεμα αρνητικό για κανένα είδος.
+        def total(prod, exclude_id=None):
+            r = db.execute(
+                """SELECT COALESCE(SUM(h.quantity_kg),0) FROM harvests h JOIN fields f ON f.id = h.field_id
+                   WHERE f.farmer_id = ? AND h.product = ? AND h.id != ?""",
+                (current_user()["id"], prod, exclude_id or -1),
+            ).fetchone()[0]
+            return r
+        def out(prod):
+            return db.execute(
+                "SELECT COALESCE(SUM(quantity_kg),0) FROM stock_outflows WHERE farmer_id = ? AND product = ?",
+                (current_user()["id"], prod),
+            ).fetchone()[0]
+        for prod, new_total in {(h["product"]): total(h["product"], harvest_id), product: total(product, harvest_id) + qty}.items():
+            if new_total + 1e-9 < out(prod):
+                flash(f"Με αυτή τη διόρθωση το απόθεμα «{prod}» θα έμενε μικρότερο από όσο έχεις ήδη διαθέσει ({out(prod):.1f} κιλά). Διόρθωσε πρώτα τις διαθέσεις.", "error")
+                return redirect(url_for("fields.edit_harvest", field_id=field_id, harvest_id=harvest_id))
+
+        db.execute(
+            "UPDATE harvests SET harvest_date=?, product=?, quantity_kg=?, notes=? WHERE id=?",
+            (harvest_date, product, qty, notes or None, harvest_id),
+        )
+        db.commit()
+        flash("Η παραγωγή ενημερώθηκε.", "success")
+        return redirect(url_for("fields.view_field", field_id=field_id))
+
+    return render_template("fields/edit_harvest.html", field=field, h=h, product_types=PRODUCT_TYPES)
+
+
+@bp.route("/<int:field_id>/tasks/<int:task_id>/edit", methods=["GET", "POST"])
+@role_required("farmer")
+def edit_task(field_id, task_id):
+    db = get_db()
+    field = _own_field(db, field_id)
+    t = db.execute("SELECT * FROM tasks WHERE id = ? AND field_id = ?", (task_id, field_id)).fetchone() if field else None
+    if t is None:
+        flash("Η καταχώρηση δεν βρέθηκε.", "error")
+        return redirect(url_for("fields.list_fields"))
+
+    if request.method == "POST":
+        task_type = request.form.get("task_type", "")
+        task_date = request.form.get("task_date", "")
+        cost_raw = (request.form.get("cost", "0").strip() or "0").replace(",", ".")
+        notes = request.form.get("notes", "").strip()
+        try:
+            cost = float(cost_raw)
+        except ValueError:
+            cost = -1
+        if task_type not in TASK_TYPES or not task_date or cost < 0:
+            flash("Συμπλήρωσε τύπο εργασίας, ημερομηνία και έγκυρο κόστος.", "error")
+            return redirect(url_for("fields.edit_task", field_id=field_id, task_id=task_id))
+        photo = save_photo(request.files.get("photo")) or t["photo_filename"]
+        db.execute(
+            "UPDATE tasks SET task_type=?, task_date=?, cost=?, notes=?, photo_filename=? WHERE id=?",
+            (task_type, task_date, cost, notes or None, photo, task_id),
+        )
+        db.commit()
+        flash("Η εργασία ενημερώθηκε.", "success")
+        return redirect(url_for("fields.view_field", field_id=field_id))
+
+    return render_template("fields/edit_task.html", field=field, t=t, task_types=TASK_TYPES)

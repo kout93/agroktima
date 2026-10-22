@@ -3,14 +3,14 @@
 {% block extra_head %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
-  #picker-map{ height:280px; border-radius:10px; border:1px solid var(--line); margin-top:6px; }
+  #picker-map{ height:340px; border-radius:10px; border:1px solid var(--line); margin-top:6px; }
   .coord-row{ display:flex; gap:8px; }
   .coord-row input{ flex:1; }
   .map-hint{ font-size:.8rem; color:var(--ink-soft); margin:6px 0 0; }
 </style>
 {% endblock %}
 {% block content %}
-<div class="card" style="max-width:520px;">
+<div class="card" style="max-width:640px;">
   <h1>Νέο κτήμα</h1>
   <form method="post" id="field-form">
     <label>Όνομα κτήματος</label>
@@ -24,14 +24,16 @@
     <label>Αριθμός δέντρων</label>
     <input type="number" name="tree_count">
 
-    <label>Σημείο στον χάρτη (προαιρετικό)</label>
+    <label>Σημάδεψε όλο το κτήμα στον χάρτη (προαιρετικό)</label>
+    <p class="map-hint">Κάνε κλικ στις γωνίες του κτήματος, μία-μία γύρω-γύρω (τουλάχιστον 3). Το εμβαδόν σε στρέμματα υπολογίζεται αυτόματα και αντικαθιστά την έκταση που έγραψες.</p>
     <div id="picker-map"></div>
-    <p class="map-hint">Κάνε κλικ στον χάρτη για να σημαδέψεις το κτήμα, ή πληκτρολόγησε συντεταγμένες απευθείας.</p>
-    <div class="coord-row" style="margin-top:8px;">
-      <input type="number" step="any" name="latitude" id="latitude" placeholder="Γεωγραφικό πλάτος">
-      <input type="number" step="any" name="longitude" id="longitude" placeholder="Γεωγραφικό μήκος">
+    <p id="boundary-area" style="font-size:.86rem; font-weight:600; margin-top:8px;"></p>
+    <input type="hidden" name="points_json" id="points_json">
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+      <button type="button" class="btn ghost" id="undo-point-btn" style="margin:0;">↩️ Αφαίρεση τελευταίου σημείου</button>
+      <button type="button" class="btn ghost" id="clear-points-btn" style="margin:0;">🗑️ Καθαρισμός όλων</button>
+      <button type="button" class="btn ghost" id="geo-point-btn" style="margin:0;">📍 Προσθήκη τρέχουσας θέσης μου</button>
     </div>
-    <button type="button" class="btn ghost" id="locate-btn" style="margin-top:8px;">📍 Χρήση της τρέχουσας θέσης μου</button>
 
     <button class="btn" type="submit">Αποθήκευση</button>
   </form>
@@ -39,59 +41,12 @@
 {% endblock %}
 {% block extra_scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="{{ url_for('static', filename='js/field-polygon.js') }}"></script>
 <script>
-(function(){
-  var startLat = 38.2, startLng = 23.8; // κέντρο Ελλάδας ως προεπιλογή
-  var streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 23, maxNativeZoom: 19, attribution: '&copy; OpenStreetMap συνεισφέροντες'
-  });
-  var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    maxZoom: 24, maxNativeZoom: 19, attribution: 'Πλακίδια &copy; Esri — Source: Esri, Maxar, Earthstar Geographics'
-  });
-  var map = L.map('picker-map', {layers: [satellite], maxZoom: 24}).setView([startLat, startLng], 6);
-  L.control.layers({"Δορυφορικός": satellite, "Δρόμοι (OpenStreetMap)": streets}).addTo(map);
-
-  var marker = null;
-  var latInput = document.getElementById('latitude');
-  var lngInput = document.getElementById('longitude');
-
-  function setMarker(lat, lng){
-    if (marker) { marker.setLatLng([lat, lng]); }
-    else { marker = L.marker([lat, lng], {draggable:true}).addTo(map);
-      marker.on('dragend', function(){
-        var p = marker.getLatLng();
-        latInput.value = p.lat.toFixed(6);
-        lngInput.value = p.lng.toFixed(6);
-      });
-    }
-    latInput.value = lat.toFixed(6);
-    lngInput.value = lng.toFixed(6);
-  }
-
-  map.on('click', function(e){
-    setMarker(e.latlng.lat, e.latlng.lng);
-  });
-
-  // Αν ο χρήστης πληκτρολογήσει χειροκίνητα, ενημέρωσε τον χάρτη
-  function syncFromInputs(){
-    var lat = parseFloat(latInput.value), lng = parseFloat(lngInput.value);
-    if (!isNaN(lat) && !isNaN(lng)) {
-      setMarker(lat, lng);
-      map.setView([lat, lng], 19);
-    }
-  }
-  latInput.addEventListener('change', syncFromInputs);
-  lngInput.addEventListener('change', syncFromInputs);
-
-  document.getElementById('locate-btn').addEventListener('click', function(){
-    if (!navigator.geolocation) { alert('Ο browser δεν υποστηρίζει εντοπισμό θέσης.'); return; }
-    navigator.geolocation.getCurrentPosition(function(pos){
-      setMarker(pos.coords.latitude, pos.coords.longitude);
-      map.setView([pos.coords.latitude, pos.coords.longitude], 19);
-    }, function(){
-      alert('Δεν ήταν δυνατή η λήψη της τρέχουσας θέσης.');
-    });
-  });
-})();
+initFieldPolygon({
+  mapDivId: 'picker-map', pointsInputId: 'points_json', areaDisplayId: 'boundary-area',
+  undoBtnId: 'undo-point-btn', clearBtnId: 'clear-points-btn', geoBtnId: 'geo-point-btn',
+  initialPoints: [], centerLat: 38.2, centerLng: 23.8
+});
 </script>
 {% endblock %}

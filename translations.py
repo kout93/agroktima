@@ -243,6 +243,7 @@ TRANSLATIONS = {
         'προαιρετικό': 'optional',
         'σε ένα μέρος.': 'in one place.',
         'το χρησιμοποιήσεις.': 'use it.',
+        'Απόθεμα & Πωλήσεις': 'Stock & Sales',
     },
     "it": {
         # ---- nav / base ----
@@ -452,5 +453,6 @@ TRANSLATIONS = {
         'προαιρετικό': 'facoltativo',
         'σε ένα μέρος.': 'in un unico posto.',
         'το χρησιμοποιήσεις.': 'usarlo.',
+        'Απόθεμα & Πωλήσεις': 'Scorte e Vendite',
     },
 }
